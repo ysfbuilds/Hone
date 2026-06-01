@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hone</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23ff6b35'/><polygon points='6,22 16,6 26,22' fill='%23ff8c5a'/><polygon points='6,22 11,14 16,22' fill='%23cc4a1a'/><polygon points='26,22 21,14 16,22' fill='%23cc4a1a'/><polygon points='6,8 11,14 6,22' fill='%23ff6b35'/><polygon points='26,8 21,14 26,22' fill='%23ff6b35'/><ellipse cx='13' cy='19' rx='1.8' ry='1.8' fill='%230a0a0a'/><ellipse cx='19' cy='19' rx='1.8' ry='1.8' fill='%230a0a0a'/><polygon points='14.5,21 16,23 17.5,21' fill='%23cc4a1a'/></svg>"/><link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --orange:#ff6b35;--orange-dark:#e85a26;--orange-light:#fff3ee;--orange-mid:#ffd0bc;
+  --green:#58cc02;--green-dark:#46a302;--green-light:#edffd5;
+  --blue:#1cb0f6;--blue-dark:#0a9fd8;--blue-light:#e0f7ff;
+  --purple:#ce82ff;--purple-dark:#a855f7;--purple-light:#f5eeff;
+  --red:#ff4b4b;--red-light:#fff0f0;
+  --yellow:#ffc800;--yellow-light:#fffae0;
+  --text:#3c3c3c;--text2:#777;--text3:#aaa;
+  --bg:#ffffff;--bg2:#f7f7f7;--border:#e5e5e5;--border2:#d0d0d0;
+  --shadow:0 4px 0 rgba(0,0,0,.12);
+  --shadow-card:0 2px 12px rgba(0,0,0,.08);
+  --r:16px;--r-sm:10px;--r-lg:24px;--r-xl:32px;
+}
+html,body{height:100%;min-height:100vh}
+body{font-family:'Nunito Sans',sans-serif;background:var(--bg2);color:var(--text);font-size:15px}
+
+/* ── Screens ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ── HOME ── */
+#homeScreen{background:var(--bg2)}
+.home-header{
+  background:var(--bg);border-bottom:2px solid var(--border);
+  padding:16px 24px;display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:40px;height:40px;background:var(--orange);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:900;font-size:20px;color:#fff;box-shadow:0 3px 0 var(--orange-dark)}
+.logo-name{font-family:'Nunito',sans-serif;font-weight:900;font-size:22px;color:var(--text);letter-spacing:-.02em}
+.streak-badge{display:flex;align-items:center;gap:6px;background:var(--yellow-light);border:2px solid var(--yellow);border-radius:20px;padding:6px 14px;font-weight:800;font-size:14px;color:#a07000;font-family:'Nunito',sans-serif}
+
+.home-hero{text-align:center;padding:40px 24px 20px}
+.home-hero h1{font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;color:var(--text);margin-bottom:8px;letter-spacing:-.02em}
+.home-hero p{font-size:15px;color:var(--text2);max-width:380px;margin:0 auto}
+
+.stats-strip{display:flex;gap:12px;padding:0 24px 24px;justify-content:center;flex-wrap:wrap}
+.stat-pill{
+  background:var(--bg);border:2px solid var(--border);border-radius:var(--r-lg);
+  padding:12px 20px;text-align:center;min-width:100px;
+  box-shadow:var(--shadow-card);
+}
+.stat-pill .val{font-family:'Nunito',sans-serif;font-size:24px;font-weight:900;color:var(--text);line-height:1}
+.stat-pill .lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:3px}
+
+.modes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:0 24px 40px;max-width:720px;margin:0 auto;width:100%}
+.mode-card{
+  background:var(--bg);border:2px solid var(--border);border-radius:var(--r-lg);
+  padding:24px;cursor:pointer;transition:all .15s;
+  box-shadow:0 4px 0 var(--border);position:relative;overflow:hidden;
+}
+.mode-card:hover{transform:translateY(-3px);box-shadow:0 7px 0 var(--border)}
+.mode-card:active{transform:translateY(1px);box-shadow:0 2px 0 var(--border)}
+.mode-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;border-radius:var(--r-lg) var(--r-lg) 0 0}
+.mode-card.orange::before{background:var(--orange)}
+.mode-card.green::before{background:var(--green)}
+.mode-card.blue::before{background:var(--blue)}
+.mode-card.purple::before{background:var(--purple)}
+.mode-emoji{font-size:36px;margin-bottom:12px;display:block}
+.mode-name{font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;color:var(--text);margin-bottom:5px}
+.mode-desc{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:14px}
+.mode-meta{display:flex;gap:8px;align-items:center}
+.mode-best{font-size:12px;font-weight:700;padding:4px 10px;border-radius:10px}
+.mode-card.orange .mode-best{background:var(--orange-light);color:var(--orange-dark)}
+.mode-card.green .mode-best{background:var(--green-light);color:var(--green-dark)}
+.mode-card.blue .mode-best{background:var(--blue-light);color:var(--blue-dark)}
+.mode-card.purple .mode-best{background:var(--purple-light);color:var(--purple-dark)}
+.mode-plays{font-size:12px;color:var(--text3);font-weight:600}
+.play-btn{
+  margin-left:auto;padding:8px 18px;border-radius:20px;border:none;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;
+  color:#fff;transition:all .12s;
+}
+.mode-card.orange .play-btn{background:var(--orange);box-shadow:0 3px 0 var(--orange-dark)}
+.mode-card.green .play-btn{background:var(--green);box-shadow:0 3px 0 var(--green-dark)}
+.mode-card.blue .play-btn{background:var(--blue);box-shadow:0 3px 0 var(--blue-dark)}
+.mode-card.purple .play-btn{background:var(--purple);box-shadow:0 3px 0 var(--purple-dark)}
+.play-btn:hover{filter:brightness(1.08)}
+.play-btn:active{transform:translateY(2px);box-shadow:none!important}
+
+/* ── GAME SCREEN ── */
+#gameScreen{background:var(--bg2);align-items:center}
+.game-topbar{
+  width:100%;background:var(--bg);border-bottom:2px solid var(--border);
+  padding:14px 24px;display:flex;align-items:center;gap:16px;
+}
+.back-btn{
+  width:36px;height:36px;border-radius:10px;border:2px solid var(--border2);
+  background:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;
+  color:var(--text2);transition:all .12s;flex-shrink:0;
+}
+.back-btn:hover{background:var(--bg2);color:var(--text)}
+.game-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:16px;color:var(--text)}
+.progress-bar-wrap{flex:1;height:14px;background:var(--border);border-radius:10px;overflow:hidden;margin:0 8px}
+.progress-bar-fill{height:100%;border-radius:10px;transition:width .3s ease;background:var(--green)}
+.game-score-badge{font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;color:var(--text);background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:4px 12px;white-space:nowrap}
+
+.game-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;width:100%;max-width:560px;margin:0 auto;gap:20px}
+
+.timer-ring-wrap{position:relative;width:80px;height:80px;flex-shrink:0}
+.timer-svg{width:80px;height:80px;transform:rotate(-90deg)}
+.timer-bg{fill:none;stroke:var(--border);stroke-width:6}
+.timer-arc{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .1s linear,stroke .3s}
+.timer-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:900;font-size:20px;color:var(--text)}
+
+.question-card{
+  background:var(--bg);border:2px solid var(--border);border-radius:var(--r-xl);
+  padding:32px;width:100%;text-align:center;box-shadow:0 6px 0 var(--border);
+}
+.q-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px}
+.q-problem{font-family:'Nunito',sans-serif;font-size:48px;font-weight:900;color:var(--text);line-height:1.1;letter-spacing:-.02em;margin-bottom:8px}
+.q-problem.memory-display{font-size:36px;letter-spacing:.1em;color:var(--blue-dark)}
+.q-sub{font-size:14px;color:var(--text2);margin-bottom:0}
+
+.answer-input{
+  font-family:'Nunito',sans-serif;font-size:32px;font-weight:800;
+  background:var(--bg);border:3px solid var(--border2);border-radius:var(--r-lg);
+  padding:14px 20px;text-align:center;outline:none;width:100%;
+  color:var(--text);transition:border-color .15s,box-shadow .15s;
+  letter-spacing:.05em;
+}
+.answer-input:focus{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-light)}
+.answer-input.correct{border-color:var(--green);background:var(--green-light);animation:correctPop .3s ease}
+.answer-input.wrong{border-color:var(--red);background:var(--red-light);animation:shake .35s ease}
+@keyframes correctPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.option-btn{
+  padding:16px;border-radius:var(--r);border:3px solid var(--border2);
+  background:var(--bg);font-family:'Nunito',sans-serif;font-size:22px;font-weight:800;
+  color:var(--text);cursor:pointer;transition:all .12s;
+  box-shadow:0 3px 0 var(--border2);
+}
+.option-btn:hover:not(:disabled){background:var(--blue-light);border-color:var(--blue);color:var(--blue-dark);transform:translateY(-2px)}
+.option-btn:active:not(:disabled){transform:translateY(1px);box-shadow:none}
+.option-btn.correct{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
+.option-btn.wrong{background:var(--red-light);border-color:var(--red);color:var(--red)}
+.option-btn:disabled{cursor:default}
+
+.submit-btn{
+  width:100%;padding:16px;border-radius:var(--r-lg);border:none;
+  font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;
+  color:#fff;background:var(--green);cursor:pointer;
+  box-shadow:0 4px 0 var(--green-dark);transition:all .12s;letter-spacing:.01em;
+}
+.submit-btn:hover{filter:brightness(1.06)}
+.submit-btn:active{transform:translateY(3px);box-shadow:none}
+.submit-btn:disabled{background:var(--border2);box-shadow:0 4px 0 var(--border);cursor:default;color:var(--text3)}
+
+.feedback-chip{
+  font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;
+  padding:8px 20px;border-radius:20px;text-align:center;
+  animation:popIn .2s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.feedback-chip.correct{background:var(--green-light);color:var(--green-dark)}
+.feedback-chip.wrong{background:var(--red-light);color:var(--red)}
+
+.memory-sequence-wrap{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.mem-digit{
+  width:52px;height:64px;border-radius:var(--r-sm);border:3px solid var(--border2);
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+  font-family:'Nunito',sans-serif;font-size:28px;font-weight:900;color:var(--text);
+  transition:all .2s;
+}
+.mem-digit.hidden{background:var(--blue);border-color:var(--blue-dark);color:transparent}
+.mem-digit.reveal{animation:flipIn .3s ease}
+@keyframes flipIn{from{transform:rotateY(90deg);opacity:0}to{transform:rotateY(0);opacity:1}}
+
+/* ── RESULTS SCREEN ── */
+#resultsScreen{background:var(--bg2);align-items:center;justify-content:center}
+.results-card{
+  background:var(--bg);border:2px solid var(--border);border-radius:var(--r-xl);
+  padding:36px 32px;max-width:440px;width:90%;text-align:center;
+  box-shadow:0 8px 0 var(--border);animation:slideUp .3s cubic-bezier(.34,1.4,.64,1);
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.results-emoji{font-size:56px;margin-bottom:12px;display:block;animation:bounce 1s ease .3s both}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.results-title{font-family:'Nunito',sans-serif;font-size:28px;font-weight:900;color:var(--text);margin-bottom:6px}
+.results-sub{font-size:14px;color:var(--text2);margin-bottom:24px}
+.results-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px}
+.rs-stat{background:var(--bg2);border-radius:var(--r);padding:14px 8px;text-align:center}
+.rs-val{font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;color:var(--text);line-height:1}
+.rs-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:4px}
+.pb-banner{background:var(--yellow-light);border:2px solid var(--yellow);border-radius:var(--r);padding:10px 16px;margin-bottom:20px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;color:#a07000;display:none}
+.pb-banner.show{display:block}
+.results-btns{display:flex;gap:10px}
+.btn-again{flex:1;padding:14px;border-radius:var(--r-lg);border:none;background:var(--green);color:#fff;font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 var(--green-dark);transition:all .12s}
+.btn-again:hover{filter:brightness(1.07)}
+.btn-again:active{transform:translateY(3px);box-shadow:none}
+.btn-home{flex:1;padding:14px;border-radius:var(--r-lg);border:3px solid var(--border2);background:var(--bg);color:var(--text2);font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;cursor:pointer;transition:all .12s}
+.btn-home:hover{background:var(--bg2);color:var(--text)}
+
+/* ── Countdown overlay ── */
+.countdown-overlay{
+  position:fixed;inset:0;background:rgba(255,255,255,.92);
+  display:none;align-items:center;justify-content:center;z-index:50;
+  flex-direction:column;gap:8px;
+}
+.countdown-overlay.show{display:flex}
+.countdown-num{font-family:'Nunito',sans-serif;font-size:96px;font-weight:900;color:var(--orange);animation:countPop .9s cubic-bezier(.34,1.56,.64,1)}
+@keyframes countPop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+.countdown-label{font-family:'Nunito',sans-serif;font-size:18px;font-weight:700;color:var(--text2)}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen active" id="homeScreen">
+  <div class="home-header">
+    <div class="logo">
+      <div class="logo-icon">H</div>
+      <div class="logo-name">Hone</div>
+    </div>
+    <div class="streak-badge">🔥 <span id="streakCount">0</span> day streak</div>
+  </div>
+  <div class="home-hero">
+    <h1>Sharpen your mind. 🧠</h1>
+    <p>Daily drills for speed, memory, and mental clarity. Pick a mode and go.</p>
+  </div>
+  <div class="stats-strip">
+    <div class="stat-pill"><div class="val" id="totalSessions">0</div><div class="lbl">Sessions</div></div>
+    <div class="stat-pill"><div class="val" id="totalCorrect">0</div><div class="lbl">Correct</div></div>
+    <div class="stat-pill"><div class="val" id="totalAccuracy">—</div><div class="lbl">Accuracy</div></div>
+    <div class="stat-pill"><div class="val" id="totalTime">0m</div><div class="lbl">Trained</div></div>
+  </div>
+  <div class="modes-grid">
+    <div class="mode-card orange" onclick="startMode('math')">
+      <span class="mode-emoji">⚡</span>
+      <div class="mode-name">Math Sprint</div>
+      <div class="mode-desc">Rapid-fire arithmetic. Addition, subtraction, multiplication, division — timed and relentless.</div>
+      <div class="mode-meta">
+        <span class="mode-best" id="best-math">Best: —</span>
+        <span class="mode-plays" id="plays-math">0 plays</span>
+        <button class="play-btn">Play</button>
+      </div>
+    </div>
+    <div class="mode-card blue" onclick="startMode('memory')">
+      <span class="mode-emoji">🧩</span>
+      <div class="mode-name">Number Memory</div>
+      <div class="mode-desc">See a number sequence, remember it, type it back. Gets longer as you level up.</div>
+      <div class="mode-meta">
+        <span class="mode-best" id="best-memory">Best: —</span>
+        <span class="mode-plays" id="plays-memory">0 plays</span>
+        <button class="play-btn">Play</button>
+      </div>
+    </div>
+    <div class="mode-card green" onclick="startMode('patterns')">
+      <span class="mode-emoji">🔢</span>
+      <div class="mode-name">Number Patterns</div>
+      <div class="mode-desc">Find the rule. What comes next in the sequence? Trains logical reasoning and pattern recognition.</div>
+      <div class="mode-meta">
+        <span class="mode-best" id="best-patterns">Best: —</span>
+        <span class="mode-plays" id="plays-patterns">0 plays</span>
+        <button class="play-btn">Play</button>
+      </div>
+    </div>
+    <div class="mode-card purple" onclick="startMode('chains')">
+      <span class="mode-emoji">🔗</span>
+      <div class="mode-name">Mental Chains</div>
+      <div class="mode-desc">Start with a number, apply operations in your head. Builds working memory under pressure.</div>
+      <div class="mode-meta">
+        <span class="mode-best" id="best-chains">Best: —</span>
+        <span class="mode-plays" id="plays-chains">0 plays</span>
+        <button class="play-btn">Play</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="gameScreen">
+  <div class="game-topbar">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="game-title" id="gameTitle">Math Sprint</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="game-score-badge">✓ <span id="scoreDisplay">0</span></div>
+  </div>
+  <div class="game-area" id="gameArea"></div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="resultsScreen">
+  <div class="results-card">
+    <span class="results-emoji" id="resultsEmoji">🎉</span>
+    <div class="results-title" id="resultsTitle">Nice work!</div>
+    <div class="results-sub" id="resultsSub">Here's how you did</div>
+    <div class="results-stats">
+      <div class="rs-stat"><div class="rs-val" id="r-score">0</div><div class="rs-lbl">Score</div></div>
+      <div class="rs-stat"><div class="rs-val" id="r-accuracy">0%</div><div class="rs-lbl">Accuracy</div></div>
+      <div class="rs-stat"><div class="rs-val" id="r-time">0s</div><div class="rs-lbl">Time</div></div>
+    </div>
+    <div class="pb-banner" id="pbBanner">🏆 New personal best!</div>
+    <div class="results-btns">
+      <button class="btn-again" onclick="playAgain()">Play again</button>
+      <button class="btn-home" onclick="goHome()">Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- Countdown -->
+<div class="countdown-overlay" id="countdownOverlay">
+  <div class="countdown-num" id="countdownNum">3</div>
+  <div class="countdown-label">Get ready!</div>
+</div>
+
+<script>
+// ── State ──
+let stats = loadStats();
+let currentMode = null;
+let session = {};
+
+function loadStats(){
+  try{ const r=localStorage.getItem('hone_v1'); if(r) return JSON.parse(r); }catch(e){}
+  return { sessions:0, correct:0, attempts:0, timeTrained:0, streak:0, lastDay:'',
+    bests:{ math:0, memory:0, patterns:0, chains:0 },
+    plays:{ math:0, memory:0, patterns:0, chains:0 } };
+}
+function saveStats(){ localStorage.setItem('hone_v1', JSON.stringify(stats)); }
+
+function updateStreak(){
+  const today = new Date().toISOString().split('T')[0];
+  if(stats.lastDay===today) return;
+  const y=new Date(); y.setDate(y.getDate()-1);
+  const yes=y.toISOString().split('T')[0];
+  stats.streak = stats.lastDay===yes ? (stats.streak||0)+1 : 1;
+  stats.lastDay=today;
+  saveStats();
+}
+
+// ── Screens ──
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome(){ show('homeScreen'); renderHome(); }
+
+function renderHome(){
+  updateStreak();
+  document.getElementById('streakCount').textContent = stats.streak||0;
+  document.getElementById('totalSessions').textContent = stats.sessions||0;
+  document.getElementById('totalCorrect').textContent = stats.correct||0;
+  const acc = stats.attempts ? Math.round(stats.correct/stats.attempts*100)+'%' : '—';
+  document.getElementById('totalAccuracy').textContent = acc;
+  const mins = Math.round((stats.timeTrained||0)/60);
+  document.getElementById('totalTime').textContent = mins+'m';
+  ['math','memory','patterns','chains'].forEach(m=>{
+    const b=stats.bests[m]||0;
+    const p=stats.plays[m]||0;
+    document.getElementById('best-'+m).textContent = b ? 'Best: '+b : 'Best: —';
+    document.getElementById('plays-'+m).textContent = p+' play'+(p!==1?'s':'');
+  });
+}
+
+// ── Mode start ──
+function startMode(mode){
+  currentMode=mode;
+  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains'};
+  document.getElementById('gameTitle').textContent=titles[mode];
+  show('gameScreen');
+  countdown(()=>initMode(mode));
+}
+
+function countdown(cb){
+  const overlay=document.getElementById('countdownOverlay');
+  const num=document.getElementById('countdownNum');
+  overlay.classList.add('show');
+  let n=3;
+  num.textContent=n;
+  const t=setInterval(()=>{
+    n--;
+    if(n<=0){ clearInterval(t); overlay.classList.remove('show'); cb(); return; }
+    num.textContent=n;
+    num.style.animation='none'; num.offsetHeight; num.style.animation='countPop .9s cubic-bezier(.34,1.56,.64,1)';
+  },900);
+}
+
+// ── Session helpers ──
+function initSession(){
+  session = { score:0, correct:0, attempts:0, startTime:Date.now(), mode:currentMode };
+}
+function setProgress(cur,total){ document.getElementById('progressFill').style.width=(cur/total*100)+'%'; }
+function setScore(n){ session.score=n; document.getElementById('scoreDisplay').textContent=n; }
+
+// ══════════════════════════════
+// MATH SPRINT
+// ══════════════════════════════
+const MATH_DURATION = 60;
+let mathTimer=null, mathTimeLeft=0, mathProblem={}, mathAnswered=0, mathTotal=20;
+
+function initMode(mode){
+  initSession();
+  if(mode==='math') initMath();
+  else if(mode==='memory') initMemory();
+  else if(mode==='patterns') initPatterns();
+  else if(mode==='chains') initChains();
+}
+
+function initMath(){
+  mathTimeLeft=MATH_DURATION; mathAnswered=0;
+  renderMathQuestion();
+  startMathTimer();
+}
+
+function genMath(){
+  const ops=['+','-','×','÷'];
+  const op=ops[Math.floor(Math.random()*ops.length)];
+  let a,b,ans;
+  if(op==='+'){a=randInt(10,99);b=randInt(10,99);ans=a+b;}
+  else if(op==='-'){a=randInt(20,99);b=randInt(10,a);ans=a-b;}
+  else if(op==='×'){a=randInt(2,12);b=randInt(2,12);ans=a*b;}
+  else{b=randInt(2,12);ans=randInt(2,12);a=b*ans;}
+  return{a,b,op,ans};
+}
+
+function renderMathQuestion(){
+  mathProblem=genMath();
+  const area=document.getElementById('gameArea');
+  setProgress(mathAnswered,mathTotal);
+  area.innerHTML=`
+    <div class="timer-ring-wrap">
+      <svg class="timer-svg" viewBox="0 0 80 80">
+        <circle class="timer-bg" cx="40" cy="40" r="34"/>
+        <circle class="timer-arc" id="timerArc" cx="40" cy="40" r="34" stroke="#ff6b35"
+          stroke-dasharray="${2*Math.PI*34}" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-text" id="timerText">${mathTimeLeft}</div>
+    </div>
+    <div class="question-card">
+      <div class="q-label">What is</div>
+      <div class="q-problem">${mathProblem.a} ${mathProblem.op} ${mathProblem.b} = ?</div>
+    </div>
+    <input class="answer-input" id="mathInput" type="number" inputmode="numeric" placeholder="Your answer" autocomplete="off"/>
+    <div id="mathFeedback" style="height:36px"></div>
+    <button class="submit-btn" id="mathSubmit" onclick="checkMath()">Submit</button>
+  `;
+  const inp=document.getElementById('mathInput');
+  inp.focus();
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') checkMath(); });
+  updateTimerArc();
+}
+
+function startMathTimer(){
+  clearInterval(mathTimer);
+  mathTimer=setInterval(()=>{
+    mathTimeLeft--;
+    const txt=document.getElementById('timerText');
+    const arc=document.getElementById('timerArc');
+    if(txt) txt.textContent=mathTimeLeft;
+    if(arc){ updateTimerArc(); }
+    if(arc) arc.style.stroke = mathTimeLeft<=10?'var(--red)':mathTimeLeft<=20?'var(--yellow)':'var(--orange)';
+    if(mathTimeLeft<=0){ clearInterval(mathTimer); endMath(); }
+  },1000);
+}
+
+function updateTimerArc(){
+  const arc=document.getElementById('timerArc');
+  if(!arc) return;
+  const circ=2*Math.PI*34;
+  const offset=circ*(1-mathTimeLeft/MATH_DURATION);
+  arc.style.strokeDashoffset=offset;
+}
+
+function checkMath(){
+  const inp=document.getElementById('mathInput');
+  const val=parseInt(inp.value);
+  if(isNaN(val)) return;
+  session.attempts++;
+  const fb=document.getElementById('mathFeedback');
+  if(val===mathProblem.ans){
+    session.correct++; mathAnswered++;
+    setScore(session.correct);
+    inp.classList.add('correct');
+    fb.innerHTML=`<div class="feedback-chip correct">✓ Correct! +1</div>`;
+    setTimeout(()=>{ inp.classList.remove('correct'); if(mathTimeLeft>0) renderMathQuestion(); },400);
+  } else {
+    inp.classList.add('wrong');
+    fb.innerHTML=`<div class="feedback-chip wrong">✗ Answer was ${mathProblem.ans}</div>`;
+    setTimeout(()=>{ inp.classList.remove('wrong'); inp.value=''; inp.focus(); },700);
+  }
+}
+
+function endMath(){
+  clearInterval(mathTimer);
+  const elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct, session.attempts, elapsed, session.correct);
+}
+
+// ══════════════════════════════
+// NUMBER MEMORY
+// ══════════════════════════════
+let memLevel=3, memSequence=[], memPhase='show', memQ=0, memTotal=6;
+
+function initMemory(){
+  memLevel=3; memQ=0; setScore(0); setProgress(0,memTotal);
+  nextMemoryRound();
+}
+
+function nextMemoryRound(){
+  if(memQ>=memTotal){ endMemory(); return; }
+  memSequence=Array.from({length:memLevel},()=>randInt(1,9));
+  memPhase='show';
+  renderMemoryShow();
+}
+
+function renderMemoryShow(){
+  const area=document.getElementById('gameArea');
+  const digitsHtml=memSequence.map(d=>`<div class="mem-digit reveal">${d}</div>`).join('');
+  area.innerHTML=`
+    <div class="question-card">
+      <div class="q-label">Memorize this sequence</div>
+      <div class="memory-sequence-wrap">${digitsHtml}</div>
+      <div class="q-sub" style="margin-top:16px;font-size:13px;color:var(--text3)">Disappears in <span id="memCountdown">3</span>s…</div>
+    </div>
+  `;
+  let t=3;
+  const cd=setInterval(()=>{
+    t--;
+    const el=document.getElementById('memCountdown');
+    if(el) el.textContent=t;
+    if(t<=0){ clearInterval(cd); renderMemoryInput(); }
+  },1000);
+}
+
+function renderMemoryInput(){
+  const area=document.getElementById('gameArea');
+  const hiddenHtml=memSequence.map(()=>`<div class="mem-digit hidden">?</div>`).join('');
+  area.innerHTML=`
+    <div class="question-card">
+      <div class="q-label">What was the sequence?</div>
+      <div class="memory-sequence-wrap">${hiddenHtml}</div>
+    </div>
+    <input class="answer-input" id="memInput" type="number" inputmode="numeric" placeholder="Type the sequence" autocomplete="off"/>
+    <div id="memFeedback" style="height:36px"></div>
+    <button class="submit-btn" onclick="checkMemory()">Submit</button>
+  `;
+  const inp=document.getElementById('memInput');
+  inp.focus();
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') checkMemory(); });
+}
+
+function checkMemory(){
+  const inp=document.getElementById('memInput');
+  const val=(inp.value||'').trim();
+  const correct=memSequence.join('');
+  session.attempts++;
+  const fb=document.getElementById('memFeedback');
+  if(val===correct){
+    session.correct++; memQ++; memLevel++;
+    setScore(session.correct); setProgress(memQ,memTotal);
+    inp.classList.add('correct');
+    fb.innerHTML=`<div class="feedback-chip correct">✓ Perfect! Level up 🎯</div>`;
+    setTimeout(()=>nextMemoryRound(),700);
+  } else {
+    memQ++; if(memLevel>3) memLevel--;
+    setProgress(memQ,memTotal);
+    inp.classList.add('wrong');
+    fb.innerHTML=`<div class="feedback-chip wrong">✗ Was: ${correct}</div>`;
+    setTimeout(()=>nextMemoryRound(),900);
+  }
+}
+
+function endMemory(){
+  const elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,memLevel-3);
+}
+
+// ══════════════════════════════
+// NUMBER PATTERNS
+// ══════════════════════════════
+const PATTERN_RULES=[
+  ()=>{ const s=randInt(1,15),d=randInt(2,8); return{seq:Array.from({length:5},(_,i)=>s+i*d),rule:'+ '+d}; },
+  ()=>{ const s=randInt(50,200),d=randInt(3,15); return{seq:Array.from({length:5},(_,i)=>s-i*d),rule:'- '+d}; },
+  ()=>{ const s=randInt(1,5),r=randInt(2,4); return{seq:Array.from({length:5},(_,i)=>s*Math.pow(r,i)),rule:'× '+r}; },
+  ()=>{ const s=randInt(2,6); return{seq:[s,s*s,s*s*s,s*s*s*s,s*s*s*s*s],rule:'power of '+s}; },
+  ()=>{ const s=randInt(1,10),d=randInt(1,5),d2=randInt(1,3); return{seq:[s,s+d,s+d+d2,s+d+d2+(d+d2),s+d+d2+(d+d2)+(d2+d+d2)],rule:'increasing step'}; },
+];
+
+let patQ=0,patTotal=10,patCurrent={};
+
+function initPatterns(){
+  patQ=0; setScore(0); setProgress(0,patTotal);
+  nextPattern();
+}
+
+function nextPattern(){
+  if(patQ>=patTotal){ endPatterns(); return; }
+  const rule=PATTERN_RULES[Math.floor(Math.random()*PATTERN_RULES.length)]();
+  const seq=rule.seq.map(Math.round);
+  const ans=seq[4];
+  const shown=seq.slice(0,4);
+  patCurrent={shown,ans,rule:rule.rule};
+  renderPattern();
+}
+
+function renderPattern(){
+  const area=document.getElementById('gameArea');
+  const seqHtml=patCurrent.shown.map(n=>`<span style="font-size:28px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--text)">${n}</span>`).join('<span style="font-size:24px;color:var(--text3);margin:0 4px">→</span>');
+  // Generate wrong options
+  const ans=patCurrent.ans;
+  const wrongs=new Set();
+  while(wrongs.size<3){ const w=ans+randInt(-20,20); if(w!==ans&&w>0) wrongs.add(w); }
+  const options=[ans,...wrongs].sort(()=>Math.random()-.5);
+  const optsHtml=options.map(o=>`<button class="option-btn" onclick="checkPattern(${o},this)">${o}</button>`).join('');
+  setProgress(patQ,patTotal);
+  area.innerHTML=`
+    <div class="question-card">
+      <div class="q-label">What comes next?</div>
+      <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin:8px 0">${seqHtml}<span style="font-size:28px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--text3);margin:0 4px">→</span><span style="font-size:32px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--blue)">?</span></div>
+    </div>
+    <div class="options-grid">${optsHtml}</div>
+    <div id="patFeedback" style="height:36px"></div>
+  `;
+}
+
+function checkPattern(val,btn){
+  document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+  session.attempts++;
+  const fb=document.getElementById('patFeedback');
+  if(val===patCurrent.ans){
+    session.correct++; patQ++;
+    setScore(session.correct); setProgress(patQ,patTotal);
+    btn.classList.add('correct');
+    fb.innerHTML=`<div class="feedback-chip correct">✓ Correct! Rule: ${patCurrent.rule}</div>`;
+  } else {
+    patQ++;
+    setProgress(patQ,patTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(b=>{ if(parseInt(b.textContent)===patCurrent.ans) b.classList.add('correct'); });
+    fb.innerHTML=`<div class="feedback-chip wrong">✗ Was ${patCurrent.ans} (${patCurrent.rule})</div>`;
+  }
+  setTimeout(()=>nextPattern(),900);
+}
+
+function endPatterns(){
+  const elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+// ══════════════════════════════
+// MENTAL CHAINS
+// ══════════════════════════════
+let chainQ=0,chainTotal=8,chainCurrent={};
+
+function initChains(){
+  chainQ=0; setScore(0); setProgress(0,chainTotal);
+  nextChain();
+}
+
+function genChain(){
+  let val=randInt(10,50);
+  const ops=[];
+  const steps=randInt(3,5);
+  for(let i=0;i<steps;i++){
+    const op=['+','-','×'][Math.floor(Math.random()*3)];
+    let n;
+    if(op==='+'){n=randInt(5,30);val+=n;}
+    else if(op==='-'){n=randInt(5,Math.min(30,val-1));val-=n;}
+    else{n=randInt(2,5);val*=n;}
+    ops.push({op,n});
+  }
+  return{start:ops[0]?val-ops.reduce((a,o)=>o.op==='+'?a+o.n:o.op==='-'?a-o.n:a*o.n,0):val, ops, ans:val};
+}
+
+function nextChain(){
+  if(chainQ>=chainTotal){ endChains(); return; }
+  // Rebuild properly
+  let start=randInt(10,40);
+  const steps=randInt(3,4);
+  const ops=[];
+  let val=start;
+  for(let i=0;i<steps;i++){
+    const op=['+','-','×'][Math.floor(Math.random()*(i>0?3:2))];
+    let n;
+    if(op==='+'){n=randInt(5,25);val+=n;}
+    else if(op==='-'){n=randInt(3,Math.min(20,val-5));val=Math.max(val-n,1);n=Math.abs(n);}
+    else{n=randInt(2,4);val*=n;}
+    ops.push({op,n});
+  }
+  chainCurrent={start,ops,ans:val};
+  renderChain();
+}
+
+function renderChain(){
+  const {start,ops}=chainCurrent;
+  const stepsHtml=ops.map(o=>`<div style="font-size:18px;font-weight:700;color:var(--text2);margin:4px 0">${o.op === '×' ? '×' : o.op} ${o.n}</div>`).join('');
+  setProgress(chainQ,chainTotal);
+  area_render(`
+    <div class="question-card">
+      <div class="q-label">Start with ${start}, then…</div>
+      <div style="margin:8px 0">${stepsHtml}</div>
+      <div style="font-size:16px;font-weight:700;color:var(--text3);margin-top:10px">What's the result?</div>
+    </div>
+    <input class="answer-input" id="chainInput" type="number" inputmode="numeric" placeholder="Final answer" autocomplete="off"/>
+    <div id="chainFeedback" style="height:36px"></div>
+    <button class="submit-btn" onclick="checkChain()">Submit</button>
+  `);
+  const inp=document.getElementById('chainInput');
+  inp.focus();
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') checkChain(); });
+}
+
+function area_render(html){ document.getElementById('gameArea').innerHTML=html; }
+
+function checkChain(){
+  const inp=document.getElementById('chainInput');
+  const val=parseInt(inp.value);
+  if(isNaN(val)) return;
+  session.attempts++;
+  const fb=document.getElementById('chainFeedback');
+  if(val===chainCurrent.ans){
+    session.correct++; chainQ++;
+    setScore(session.correct); setProgress(chainQ,chainTotal);
+    inp.classList.add('correct');
+    fb.innerHTML=`<div class="feedback-chip correct">✓ Correct! 🔥</div>`;
+    setTimeout(()=>nextChain(),600);
+  } else {
+    chainQ++; setProgress(chainQ,chainTotal);
+    inp.classList.add('wrong');
+    fb.innerHTML=`<div class="feedback-chip wrong">✗ Answer was ${chainCurrent.ans}</div>`;
+    setTimeout(()=>nextChain(),900);
+  }
+}
+
+function endChains(){
+  const elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+// ── Finish ──
+function finishSession(correct,attempts,elapsed,score){
+  clearInterval(mathTimer);
+  stats.sessions++;
+  stats.correct+=correct;
+  stats.attempts+=attempts;
+  stats.timeTrained+=elapsed;
+  stats.plays[currentMode]=(stats.plays[currentMode]||0)+1;
+  const isPB = score > (stats.bests[currentMode]||0);
+  if(isPB) stats.bests[currentMode]=score;
+  saveStats();
+
+  const acc=attempts?Math.round(correct/attempts*100):0;
+  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!'};
+  const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗'};
+  document.getElementById('resultsEmoji').textContent=emojis[currentMode];
+  document.getElementById('resultsTitle').textContent=titles[currentMode];
+  document.getElementById('resultsSub').textContent=`${correct} correct out of ${attempts} attempts`;
+  document.getElementById('r-score').textContent=score;
+  document.getElementById('r-accuracy').textContent=acc+'%';
+  document.getElementById('r-time').textContent=elapsed+'s';
+  document.getElementById('pbBanner').classList.toggle('show',isPB);
+  show('resultsScreen');
+}
+
+function playAgain(){ startMode(currentMode); }
+
+function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+// ── Init ──
+renderHome();
+</script>
+</body>
+</html>
