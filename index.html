@@ -193,6 +193,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
       <div class="mode-desc">Don't calculate &mdash; estimate. How close can you get? Builds the intuition that wins interviews.</div>
       <div class="mode-meta"><span class="mode-best" id="best-fermi">Best: &mdash;</span><span class="mode-plays" id="plays-fermi">0 plays</span><button class="play-btn">Play</button></div>
     </div>
+    <div class="mode-card blue" onclick="startMode('operator')">
+      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="32" height="32" rx="8" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="8" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">8</text><text x="16" y="24" font-family="serif" font-size="14" font-weight="700" fill="#0a0a0a">?</text><text x="24" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">4</text><line x1="8" y1="30" x2="32" y2="30" stroke="#0a0a0a" stroke-width="1"/><text x="14" y="38" font-family="serif" font-size="10" font-weight="700" fill="#0a0a0a">= 32</text></svg>
+      <div class="mode-name">Operator Hunt</div>
+      <div class="mode-desc">Given the numbers and result, find the missing operator. Gets harder with chained operations.</div>
+      <div class="mode-meta"><span class="mode-best" id="best-operator">Best: &mdash;</span><span class="mode-plays" id="plays-operator">0 plays</span><button class="play-btn">Play</button></div>
+    </div>
+    <div class="mode-card purple" onclick="startMode('truefalse')">
+      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M8 20 L16 28 L32 12" stroke="#0a0a0a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="22" y1="22" x2="34" y2="34" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/><line x1="34" y1="22" x2="22" y2="34" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="mode-name">True or False</div>
+      <div class="mode-desc">A math statement flashes. Is it true or false? Builds snap evaluation and mental verification.</div>
+      <div class="mode-meta"><span class="mode-best" id="best-truefalse">Best: &mdash;</span><span class="mode-plays" id="plays-truefalse">0 plays</span><button class="play-btn">Play</button></div>
+    </div>
   </div>
 </div>
 <div class="screen" id="gameScreen">
@@ -267,7 +279,7 @@ function renderHome(){
   document.getElementById('totalAccuracy').textContent = acc;
   const mins = Math.round((stats.timeTrained||0)/60);
   document.getElementById('totalTime').textContent = mins+'m';
-  ['math','memory','patterns','chains','rapid','fermi'].forEach(m=>{
+  ['math','memory','patterns','chains','rapid','fermi','operator','truefalse'].forEach(m=>{
     const b=stats.bests[m]||0;
     const p=stats.plays[m]||0;
     document.getElementById('best-'+m).textContent = b ? 'Best: '+b : 'Best: —';
@@ -278,7 +290,7 @@ function renderHome(){
 // ── Mode start ──
 function startMode(mode){
   currentMode=mode;
-  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation'};
+  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation',operator:'Operator Hunt',truefalse:'True or False'};
   document.getElementById('gameTitle').textContent=titles[mode];
   show('gameScreen');
   countdown(()=>initMode(mode));
@@ -319,6 +331,8 @@ function initMode(mode){
   else if(mode==='chains') initChains();
   else if(mode==='rapid') initRapid();
   else if(mode==='fermi') initFermi();
+  else if(mode==='operator') initOperator();
+  else if(mode==='truefalse') initTrueFalse();
 }
 
 function initMath(){
@@ -817,6 +831,260 @@ function endFermi(){
   finishSession(session.correct,session.attempts,elapsed,session.correct);
 }
 
+// ══════════════════════════════
+// OPERATOR HUNT
+// ══════════════════════════════
+let opQ=0, opTotal=12, opCurrent={};
+
+function initOperator(){
+  opQ=0; setScore(0); setProgress(0,opTotal);
+  nextOperator();
+}
+
+function genOperator(){
+  const difficulty = Math.min(Math.floor(opQ/4), 2); // 0=easy, 1=medium, 2=hard
+  if(difficulty===0){
+    // Single operator: a ? b = result
+    const ops=['+','-','×','÷'];
+    const op=ops[randInt(0,3)];
+    let a,b,ans;
+    if(op==='+'){a=randInt(5,50);b=randInt(5,50);ans=a+b;}
+    else if(op==='-'){a=randInt(20,80);b=randInt(5,a-1);ans=a-b;}
+    else if(op==='×'){a=randInt(2,12);b=randInt(2,12);ans=a*b;}
+    else{b=randInt(2,12);ans=randInt(2,12);a=b*ans;}
+    return{display:`${a} ? ${b} = ${ans}`, answer:op, options:['+','-','×','÷']};
+  } else if(difficulty===1){
+    // Two numbers but trickier values
+    const ops=['+','-','×','÷'];
+    const op=ops[randInt(0,3)];
+    let a,b,ans;
+    if(op==='+'){a=randInt(25,150);b=randInt(25,150);ans=a+b;}
+    else if(op==='-'){a=randInt(50,200);b=randInt(10,a-1);ans=a-b;}
+    else if(op==='×'){a=randInt(6,25);b=randInt(3,15);ans=a*b;}
+    else{b=randInt(3,15);ans=randInt(5,25);a=b*ans;}
+    return{display:`${a} ? ${b} = ${ans}`, answer:op, options:['+','-','×','÷']};
+  } else {
+    // Two operators: a ? b ? c = result
+    const ops=['+','-','×'];
+    const op1=ops[randInt(0,2)], op2=ops[randInt(0,2)];
+    const a=randInt(2,12),b=randInt(2,12),c=randInt(2,10);
+    let ans;
+    // Evaluate left to right for simplicity
+    let step1;
+    if(op1==='+') step1=a+b; else if(op1==='-') step1=a-b; else step1=a*b;
+    if(op2==='+') ans=step1+c; else if(op2==='-') ans=step1-c; else ans=step1*c;
+    const display = `${a} ? ${b} ? ${c} = ${ans}`;
+    return{display, answer:op1+' '+op2, options:null, multi:true, a,b,c,ans,op1,op2};
+  }
+}
+
+function nextOperator(){
+  if(opQ>=opTotal){ endOperator(); return; }
+  opCurrent = genOperator();
+  setProgress(opQ, opTotal);
+  const area = document.getElementById('gameArea');
+
+  if(!opCurrent.multi){
+    area.innerHTML=`
+      <div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">${opQ+1} / ${opTotal}</div>
+      <div class="question-card">
+        <div class="q-label">Find the operator</div>
+        <div class="q-problem" style="font-size:32px">${opCurrent.display}</div>
+      </div>
+      <div class="options-grid">
+        ${opCurrent.options.map(o=>`<button class="option-btn" style="font-size:24px" onclick="checkOperator('${o}',this)">${o}</button>`).join('')}
+      </div>
+      <div id="opFeedback" style="height:36px;display:flex;align-items:center;justify-content:center"></div>
+    `;
+  } else {
+    // Two operator mode — show two rows of buttons
+    const ops=['+','-','×'];
+    area.innerHTML=`
+      <div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">${opQ+1} / ${opTotal}</div>
+      <div class="question-card">
+        <div class="q-label">Find both operators (left to right)</div>
+        <div class="q-problem" style="font-size:28px">${opCurrent.display}</div>
+      </div>
+      <div style="width:100%">
+        <div style="font-size:12px;color:var(--text3);font-weight:600;margin-bottom:6px">First operator</div>
+        <div class="options-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:12px">
+          ${ops.map(o=>`<button class="option-btn op1-btn" style="font-size:22px" onclick="pickOp1('${o}',this)">${o}</button>`).join('')}
+        </div>
+        <div style="font-size:12px;color:var(--text3);font-weight:600;margin-bottom:6px">Second operator</div>
+        <div class="options-grid" style="grid-template-columns:1fr 1fr 1fr">
+          ${ops.map(o=>`<button class="option-btn op2-btn" style="font-size:22px" onclick="pickOp2('${o}',this)">${o}</button>`).join('')}
+        </div>
+      </div>
+      <button class="submit-btn" id="opSubmitBtn" onclick="submitOperator()" disabled>Check</button>
+      <div id="opFeedback" style="height:36px;display:flex;align-items:center;justify-content:center"></div>
+    `;
+  }
+}
+
+let selectedOp1=null, selectedOp2=null;
+function pickOp1(op, btn){
+  selectedOp1=op;
+  document.querySelectorAll('.op1-btn').forEach(b=>{b.style.background='';b.style.borderColor='';b.style.color=''});
+  btn.style.background='var(--bg2)';btn.style.borderColor='var(--text)';
+  if(selectedOp1&&selectedOp2) document.getElementById('opSubmitBtn').disabled=false;
+}
+function pickOp2(op, btn){
+  selectedOp2=op;
+  document.querySelectorAll('.op2-btn').forEach(b=>{b.style.background='';b.style.borderColor='';b.style.color=''});
+  btn.style.background='var(--bg2)';btn.style.borderColor='var(--text)';
+  if(selectedOp1&&selectedOp2) document.getElementById('opSubmitBtn').disabled=false;
+}
+function submitOperator(){
+  if(!selectedOp1||!selectedOp2) return;
+  session.attempts++;
+  const fb=document.getElementById('opFeedback');
+  const correct = selectedOp1===opCurrent.op1 && selectedOp2===opCurrent.op2;
+  document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+  document.getElementById('opSubmitBtn').disabled=true;
+  if(correct){
+    session.correct++; opQ++;
+    setScore(session.correct); setProgress(opQ,opTotal);
+    fb.innerHTML=`<div class="feedback-chip correct">✓ ${opCurrent.op1} and ${opCurrent.op2}</div>`;
+  } else {
+    opQ++; setProgress(opQ,opTotal);
+    fb.innerHTML=`<div class="feedback-chip wrong">✗ Was ${opCurrent.op1} and ${opCurrent.op2}</div>`;
+  }
+  selectedOp1=null; selectedOp2=null;
+  setTimeout(()=>nextOperator(),900);
+}
+
+function checkOperator(val, btn){
+  document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+  session.attempts++;
+  const fb=document.getElementById('opFeedback');
+  if(val===opCurrent.answer){
+    session.correct++; opQ++;
+    setScore(session.correct); setProgress(opQ,opTotal);
+    btn.classList.add('correct');
+    fb.innerHTML=`<div class="feedback-chip correct">✓ It's ${opCurrent.answer}</div>`;
+  } else {
+    opQ++; setProgress(opQ,opTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(b=>{ if(b.textContent===opCurrent.answer) b.classList.add('correct'); });
+    fb.innerHTML=`<div class="feedback-chip wrong">✗ Was ${opCurrent.answer}</div>`;
+  }
+  setTimeout(()=>nextOperator(),800);
+}
+
+function endOperator(){
+  const elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+// ══════════════════════════════
+// TRUE OR FALSE
+// ══════════════════════════════
+let tfQ=0, tfTotal=15, tfCurrent={};
+
+function initTrueFalse(){
+  tfQ=0; setScore(0); setProgress(0,tfTotal);
+  nextTF();
+}
+
+function genTF(){
+  const types = [
+    // Comparison: a × b > c
+    ()=>{
+      const a=randInt(3,15),b=randInt(3,15),c=randInt(10,200);
+      const real=a*b;
+      const isTrue=real>c;
+      return{statement:`${a} × ${b} > ${c}`, isTrue};
+    },
+    // Comparison: a + b < c
+    ()=>{
+      const a=randInt(10,99),b=randInt(10,99),c=randInt(50,250);
+      const real=a+b;
+      const isTrue=real<c;
+      return{statement:`${a} + ${b} < ${c}`, isTrue};
+    },
+    // Equality: a × b = c (sometimes true sometimes false)
+    ()=>{
+      const a=randInt(3,12),b=randInt(3,12);
+      const real=a*b;
+      const fake=Math.random()>.5;
+      const shown=fake?real+randInt(1,5)*(Math.random()>.5?1:-1):real;
+      return{statement:`${a} × ${b} = ${shown}`, isTrue:shown===real};
+    },
+    // Square: n² = x
+    ()=>{
+      const n=randInt(4,20);
+      const real=n*n;
+      const fake=Math.random()>.5;
+      const shown=fake?real+randInt(1,10)*(Math.random()>.5?1:-1):real;
+      return{statement:`${n}² = ${shown}`, isTrue:shown===real};
+    },
+    // Division: a ÷ b = c
+    ()=>{
+      const b=randInt(2,12),c=randInt(2,15);
+      const a=b*c;
+      const fake=Math.random()>.5;
+      const shownC=fake?c+randInt(1,3)*(Math.random()>.5?1:-1):c;
+      return{statement:`${a} ÷ ${b} = ${shownC}`, isTrue:shownC===c};
+    },
+    // Percentage: x% of n > m
+    ()=>{
+      const p=randInt(1,9)*10,n=randInt(50,300);
+      const real=Math.round(p/100*n);
+      const m=real+randInt(-20,20);
+      return{statement:`${p}% of ${n} > ${m}`, isTrue:real>m};
+    },
+    // Chained: a + b - c > d
+    ()=>{
+      const a=randInt(20,80),b=randInt(10,40),c=randInt(5,30),d=randInt(20,100);
+      const real=a+b-c;
+      return{statement:`${a} + ${b} - ${c} > ${d}`, isTrue:real>d};
+    },
+  ];
+  return types[Math.floor(Math.random()*types.length)]();
+}
+
+function nextTF(){
+  if(tfQ>=tfTotal){ endTF(); return; }
+  tfCurrent = genTF();
+  setProgress(tfQ, tfTotal);
+  const area = document.getElementById('gameArea');
+  area.innerHTML=`
+    <div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">${tfQ+1} / ${tfTotal}</div>
+    <div class="question-card">
+      <div class="q-label">True or false?</div>
+      <div class="q-problem" style="font-size:30px">${tfCurrent.statement}</div>
+    </div>
+    <div style="display:flex;gap:12px;width:100%">
+      <button class="option-btn" style="flex:1;font-size:18px;padding:20px" onclick="checkTF(true,this)">True ✓</button>
+      <button class="option-btn" style="flex:1;font-size:18px;padding:20px" onclick="checkTF(false,this)">False ✗</button>
+    </div>
+    <div id="tfFeedback" style="height:36px;display:flex;align-items:center;justify-content:center"></div>
+  `;
+}
+
+function checkTF(answer, btn){
+  document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+  session.attempts++;
+  const fb=document.getElementById('tfFeedback');
+  const correct = answer===tfCurrent.isTrue;
+  if(correct){
+    session.correct++; tfQ++;
+    setScore(session.correct); setProgress(tfQ,tfTotal);
+    btn.classList.add('correct');
+    fb.innerHTML=`<div class="feedback-chip correct">✓ Correct!</div>`;
+  } else {
+    tfQ++; setProgress(tfQ,tfTotal);
+    btn.classList.add('wrong');
+    fb.innerHTML=`<div class="feedback-chip wrong">✗ It was ${tfCurrent.isTrue?'True':'False'}</div>`;
+  }
+  setTimeout(()=>nextTF(),800);
+}
+
+function endTF(){
+  const elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
 // ── Finish ──
 function finishSession(correct,attempts,elapsed,score){
   clearInterval(mathTimer);
@@ -830,8 +1098,8 @@ function finishSession(correct,attempts,elapsed,score){
   saveStats();
 
   const acc=attempts?Math.round(correct/attempts*100):0;
-  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!'};
-  const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗',rapid:'👁️',fermi:'🎯'};
+  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!',operator:'Hunt complete!',truefalse:'Quick thinker!'};
+  const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗',rapid:'👁️',fermi:'🎯',operator:'🔍',truefalse:'✅'};
   document.getElementById('resultsEmoji').textContent=emojis[currentMode];
   document.getElementById('resultsTitle').textContent=titles[currentMode];
   document.getElementById('resultsSub').textContent=`${correct} correct out of ${attempts} attempts`;
