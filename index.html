@@ -181,6 +181,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
       <div class="mode-desc">Start with a number, apply operations in your head. Builds working memory under pressure.</div>
       <div class="mode-meta"><span class="mode-best" id="best-chains">Best: &mdash;</span><span class="mode-plays" id="plays-chains">0 plays</span><button class="play-btn">Play</button></div>
     </div>
+    <div class="mode-card orange" onclick="startMode('rapid')">
+      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="12" cy="20" r="9" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><circle cx="28" cy="20" r="9" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="9" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">7</text><text x="25" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">4</text><text x="18" y="12" font-family="serif" font-size="10" font-weight="700" fill="#0a0a0a">&gt;</text></svg>
+      <div class="mode-name">Rapid Comparison</div>
+      <div class="mode-desc">Two numbers flash. Tap the bigger one. Sounds easy &mdash; gets insanely fast. Trains snap judgment.</div>
+      <div class="mode-meta"><span class="mode-best" id="best-rapid">Best: &mdash;</span><span class="mode-plays" id="plays-rapid">0 plays</span><button class="play-btn">Play</button></div>
+    </div>
+    <div class="mode-card green" onclick="startMode('fermi')">
+      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M8 32 L20 8 L32 32 Z" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="16" y="28" font-family="serif" font-size="9" font-weight="700" fill="#0a0a0a">~</text><circle cx="20" cy="20" r="3" stroke="#0a0a0a" stroke-width="1.2" stroke-dasharray="2 2"/></svg>
+      <div class="mode-name">Fermi Estimation</div>
+      <div class="mode-desc">Don't calculate &mdash; estimate. How close can you get? Builds the intuition that wins interviews.</div>
+      <div class="mode-meta"><span class="mode-best" id="best-fermi">Best: &mdash;</span><span class="mode-plays" id="plays-fermi">0 plays</span><button class="play-btn">Play</button></div>
+    </div>
   </div>
 </div>
 <div class="screen" id="gameScreen">
@@ -255,7 +267,7 @@ function renderHome(){
   document.getElementById('totalAccuracy').textContent = acc;
   const mins = Math.round((stats.timeTrained||0)/60);
   document.getElementById('totalTime').textContent = mins+'m';
-  ['math','memory','patterns','chains'].forEach(m=>{
+  ['math','memory','patterns','chains','rapid','fermi'].forEach(m=>{
     const b=stats.bests[m]||0;
     const p=stats.plays[m]||0;
     document.getElementById('best-'+m).textContent = b ? 'Best: '+b : 'Best: —';
@@ -266,7 +278,7 @@ function renderHome(){
 // ── Mode start ──
 function startMode(mode){
   currentMode=mode;
-  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains'};
+  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation'};
   document.getElementById('gameTitle').textContent=titles[mode];
   show('gameScreen');
   countdown(()=>initMode(mode));
@@ -305,6 +317,8 @@ function initMode(mode){
   else if(mode==='memory') initMemory();
   else if(mode==='patterns') initPatterns();
   else if(mode==='chains') initChains();
+  else if(mode==='rapid') initRapid();
+  else if(mode==='fermi') initFermi();
 }
 
 function initMath(){
@@ -638,6 +652,171 @@ function endChains(){
   finishSession(session.correct,session.attempts,elapsed,session.correct);
 }
 
+// ══════════════════════════════
+// RAPID COMPARISON
+// ══════════════════════════════
+const RAPID_DURATION = 30;
+let rapidTimer=null, rapidTimeLeft=0, rapidQ=0;
+
+function initRapid(){
+  rapidTimeLeft=RAPID_DURATION; rapidQ=0;
+  startRapidTimer();
+  nextRapid();
+}
+
+function nextRapid(){
+  if(rapidTimeLeft<=0) return;
+  // Generate two different numbers, get harder over time
+  const range = Math.min(20 + rapidQ*5, 500);
+  let a=randInt(1,range), b=randInt(1,range);
+  while(b===a) b=randInt(1,range);
+  setProgress(rapidQ, 30);
+  const area=document.getElementById('gameArea');
+  area.innerHTML=`
+    <div class="timer-ring-wrap">
+      <svg class="timer-svg" viewBox="0 0 80 80">
+        <circle class="timer-bg" cx="40" cy="40" r="34"/>
+        <circle class="timer-arc" id="timerArc" cx="40" cy="40" r="34" stroke="#0a0a0a"
+          stroke-dasharray="${2*Math.PI*34}" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-text" id="timerText">${rapidTimeLeft}</div>
+    </div>
+    <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:-8px">Tap the bigger number</div>
+    <div style="display:flex;gap:14px;width:100%">
+      <button class="option-btn" style="flex:1;font-size:28px;padding:28px 16px" onclick="checkRapid(${a},${b},${a>b},this)">${a}</button>
+      <button class="option-btn" style="flex:1;font-size:28px;padding:28px 16px" onclick="checkRapid(${b},${a},${b>a},this)">${b}</button>
+    </div>
+    <div id="rapidFeedback" style="height:32px"></div>
+  `;
+  updateRapidArc();
+}
+
+function startRapidTimer(){
+  clearInterval(rapidTimer);
+  rapidTimer=setInterval(()=>{
+    rapidTimeLeft--;
+    const txt=document.getElementById('timerText');
+    if(txt) txt.textContent=rapidTimeLeft;
+    updateRapidArc();
+    const arc=document.getElementById('timerArc');
+    if(arc) arc.style.stroke = rapidTimeLeft<=5?'var(--red)':rapidTimeLeft<=10?'#eab308':'#0a0a0a';
+    if(rapidTimeLeft<=0){ clearInterval(rapidTimer); endRapid(); }
+  },1000);
+}
+
+function updateRapidArc(){
+  const arc=document.getElementById('timerArc');
+  if(!arc) return;
+  const circ=2*Math.PI*34;
+  arc.style.strokeDashoffset=circ*(1-rapidTimeLeft/RAPID_DURATION);
+}
+
+function checkRapid(picked, other, isCorrect, btn){
+  document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+  session.attempts++;
+  const fb=document.getElementById('rapidFeedback');
+  if(isCorrect){
+    session.correct++; rapidQ++;
+    setScore(session.correct);
+    btn.classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">✓</div>';
+    setTimeout(()=>{ if(rapidTimeLeft>0) nextRapid(); },300);
+  } else {
+    btn.classList.add('wrong');
+    fb.innerHTML='<div class="feedback-chip wrong">✗</div>';
+    setTimeout(()=>{ if(rapidTimeLeft>0) nextRapid(); },500);
+  }
+}
+
+function endRapid(){
+  clearInterval(rapidTimer);
+  const elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct, session.attempts, elapsed, session.correct);
+}
+
+// ══════════════════════════════
+// FERMI ESTIMATION
+// ══════════════════════════════
+let fermiQ=0, fermiTotal=10, fermiCurrent={};
+
+function initFermi(){
+  fermiQ=0; setScore(0); setProgress(0,fermiTotal);
+  nextFermi();
+}
+
+function genFermi(){
+  const types=[
+    // multiplication estimates
+    ()=>{ const a=randInt(15,99),b=randInt(15,99); return{q:`${a} × ${b}`,ans:a*b}; },
+    ()=>{ const a=randInt(100,999),b=randInt(2,19); return{q:`${a} × ${b}`,ans:a*b}; },
+    // percentage estimates
+    ()=>{ const p=randInt(1,9)*5,n=randInt(50,500); return{q:`${p}% of ${n}`,ans:Math.round(p/100*n)}; },
+    ()=>{ const p=randInt(1,4)*10+randInt(0,1)*5,n=randInt(200,2000); return{q:`${p}% of ${n}`,ans:Math.round(p/100*n)}; },
+    // division estimates
+    ()=>{ const b=randInt(3,15),ans=randInt(10,99),a=b*ans+randInt(-2,2); return{q:`${a} ÷ ${b}`,ans:Math.round(a/b)}; },
+    // square estimates
+    ()=>{ const n=randInt(11,35); return{q:`${n}²`,ans:n*n}; },
+    // combined
+    ()=>{ const a=randInt(20,60),b=randInt(20,60),c=randInt(2,8); return{q:`(${a} + ${b}) × ${c}`,ans:(a+b)*c}; },
+  ];
+  return types[Math.floor(Math.random()*types.length)]();
+}
+
+function nextFermi(){
+  if(fermiQ>=fermiTotal){ endFermi(); return; }
+  fermiCurrent = genFermi();
+  const ans = fermiCurrent.ans;
+  // Generate 3 wrong options at varying distances
+  const spread = Math.max(Math.round(ans*0.3), 10);
+  const wrongs = new Set();
+  while(wrongs.size<3){
+    const offset = randInt(1,3) * randInt(1, spread);
+    const sign = Math.random()>.5 ? 1 : -1;
+    const w = ans + sign * offset;
+    if(w!==ans && w>0 && !wrongs.has(w)) wrongs.add(w);
+  }
+  const options = [ans,...wrongs].sort(()=>Math.random()-.5);
+  setProgress(fermiQ, fermiTotal);
+  const area = document.getElementById('gameArea');
+  area.innerHTML=`
+    <div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">${fermiQ+1} / ${fermiTotal}</div>
+    <div class="question-card">
+      <div class="q-label">Estimate — don't calculate</div>
+      <div class="q-problem" style="font-size:34px">${fermiCurrent.q} ≈ ?</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">Pick the closest answer</div>
+    </div>
+    <div class="options-grid">
+      ${options.map(o=>`<button class="option-btn" onclick="checkFermi(${o},this)">${o.toLocaleString()}</button>`).join('')}
+    </div>
+    <div id="fermiFeedback" style="min-height:36px;display:flex;align-items:center;justify-content:center"></div>
+  `;
+}
+
+function checkFermi(val, btn){
+  document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+  session.attempts++;
+  const fb=document.getElementById('fermiFeedback');
+  const ans=fermiCurrent.ans;
+  if(val===ans){
+    session.correct++; fermiQ++;
+    setScore(session.correct); setProgress(fermiQ,fermiTotal);
+    btn.classList.add('correct');
+    fb.innerHTML=`<div class="feedback-chip correct">✓ Exactly! ${ans.toLocaleString()}</div>`;
+  } else {
+    fermiQ++; setProgress(fermiQ,fermiTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(b=>{ if(parseInt(b.textContent.replace(/,/g,''))===ans) b.classList.add('correct'); });
+    const pct=Math.round(Math.abs(val-ans)/ans*100);
+    fb.innerHTML=`<div class="feedback-chip wrong">✗ Was ${ans.toLocaleString()} (off by ${pct}%)</div>`;
+  }
+  setTimeout(()=>nextFermi(),1000);
+}
+
+function endFermi(){
+  const elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
 // ── Finish ──
 function finishSession(correct,attempts,elapsed,score){
   clearInterval(mathTimer);
@@ -651,8 +830,8 @@ function finishSession(correct,attempts,elapsed,score){
   saveStats();
 
   const acc=attempts?Math.round(correct/attempts*100):0;
-  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!'};
-  const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗'};
+  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!'};
+  const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗',rapid:'👁️',fermi:'🎯'};
   document.getElementById('resultsEmoji').textContent=emojis[currentMode];
   document.getElementById('resultsTitle').textContent=titles[currentMode];
   document.getElementById('resultsSub').textContent=`${correct} correct out of ${attempts} attempts`;
