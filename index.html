@@ -135,6 +135,22 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
 .cat-tab{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .12s}
 .cat-tab:hover{border-color:var(--border2);color:var(--text)}
 .cat-tab.on{background:var(--text);color:var(--white);border-color:var(--text)}
+.cat-cards{display:flex;flex-direction:column;gap:12px;padding:0 24px 48px;max-width:520px;margin:0 auto;width:100%}
+.cat-card{
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:22px 24px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:18px;
+  box-shadow:var(--shadow);
+}
+.cat-card:hover{box-shadow:var(--shadow-card);transform:translateY(-2px)}
+.cat-icon{width:48px;height:48px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.cat-info{flex:1}
+.cat-name{font-size:17px;font-weight:700;color:var(--text);margin-bottom:3px}
+.cat-desc{font-size:13px;color:var(--text2);line-height:1.5}
+.cat-count{font-size:12px;font-weight:600;color:var(--text3);background:var(--bg2);border:1px solid var(--border);padding:4px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.cat-arrow{font-size:18px;color:var(--border2);flex-shrink:0}
+.cat-screen-header{display:flex;align-items:center;gap:12px;padding:0 24px 20px;max-width:720px;margin:0 auto;width:100%}
+.cat-screen-title{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.02em}
+.cat-screen-sub{font-size:13px;color:var(--text2)}
 .cat-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;padding:0 24px;margin-bottom:8px;max-width:720px;margin-left:auto;margin-right:auto;width:100%}
 .gm-grid{display:grid;gap:6px;width:100%;max-width:280px;margin:0 auto}
 .gm-cell{aspect-ratio:1;border-radius:var(--r-sm);border:1.5px solid var(--border2);background:var(--bg);cursor:pointer;transition:all .15s}
@@ -170,8 +186,45 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
     <div class="stat-pill"><div class="val" id="totalAccuracy">&mdash;</div><div class="lbl">Accuracy</div></div>
     <div class="stat-pill"><div class="val" id="totalTime">0m</div><div class="lbl">Trained</div></div>
   </div>
-  <div class="cat-tabs" id="catTabs"></div>
-  <div id="modesContainer">
+  <div id="homeCategories">
+    <div class="cat-cards">
+      <div class="cat-card" onclick="openCategory('Speed')">
+        <div class="cat-icon" style="background:var(--orange-light)">⚡</div>
+        <div class="cat-info">
+          <div class="cat-name">Speed</div>
+          <div class="cat-desc">Rapid-fire drills for processing speed and snap decisions</div>
+        </div>
+        <div class="cat-count" id="catCount-Speed">3 games</div>
+        <div class="cat-arrow">→</div>
+      </div>
+      <div class="cat-card" onclick="openCategory('Memory')">
+        <div class="cat-icon" style="background:var(--blue-light)">🧠</div>
+        <div class="cat-info">
+          <div class="cat-name">Memory</div>
+          <div class="cat-desc">Train recall, pattern recognition, and visual memory</div>
+        </div>
+        <div class="cat-count" id="catCount-Memory">3 games</div>
+        <div class="cat-arrow">→</div>
+      </div>
+      <div class="cat-card" onclick="openCategory('Logic')">
+        <div class="cat-icon" style="background:var(--green-light)">🧩</div>
+        <div class="cat-info">
+          <div class="cat-name">Logic</div>
+          <div class="cat-desc">Patterns, estimation, and reasoning under pressure</div>
+        </div>
+        <div class="cat-count" id="catCount-Logic">4 games</div>
+        <div class="cat-arrow">→</div>
+      </div>
+    </div>
+  </div>
+  <div id="categoryScreen" style="display:none">
+    <div class="cat-screen-header">
+      <button class="back-btn" onclick="closeCategory()">←</button>
+      <div>
+        <div class="cat-screen-title" id="catScreenTitle"></div>
+        <div class="cat-screen-sub" id="catScreenSub"></div>
+      </div>
+    </div>
     <div class="modes-grid" id="modesGrid"></div>
   </div>
 </div>
@@ -270,20 +323,29 @@ var MODES = [
    desc:"Don't calculate — estimate. How close can you get? Builds interview intuition.",
    svg:'<path d="M8 32 L20 8 L32 32 Z" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="16" y="28" font-family="serif" font-size="9" font-weight="700" fill="#0a0a0a">~</text><circle cx="20" cy="20" r="3" stroke="#0a0a0a" stroke-width="1.2" stroke-dasharray="2 2"/>'},
 ];
-var activeCat = 'all';
+var activeCat = null;
+var CAT_DESCS = {Speed:'Rapid-fire drills for processing speed',Memory:'Train recall and visual memory',Logic:'Patterns, estimation, and reasoning'};
 
-function renderCatTabs(){
-  var tabs=document.getElementById('catTabs');
-  var cats=['all','Speed','Memory','Logic'];
-  tabs.innerHTML=cats.map(function(c){
-    return '<button class="cat-tab'+(activeCat===c?' on':'')+'" onclick="activeCat=\''+c+'\';renderCatTabs();renderModes()">'+( c==='all'?'All':c)+'</button>';
-  }).join('');
+function openCategory(cat){
+  activeCat = cat;
+  document.getElementById('homeCategories').style.display='none';
+  document.getElementById('categoryScreen').style.display='block';
+  document.getElementById('catScreenTitle').textContent=cat;
+  var count=MODES.filter(function(m){return m.cat===cat}).length;
+  document.getElementById('catScreenSub').textContent=count+' game'+(count!==1?'s':'');
+  renderModes();
+}
+
+function closeCategory(){
+  activeCat=null;
+  document.getElementById('homeCategories').style.display='block';
+  document.getElementById('categoryScreen').style.display='none';
 }
 
 function renderModes(){
   var grid=document.getElementById('modesGrid');
   grid.innerHTML='';
-  var modes=activeCat==='all'?MODES:MODES.filter(function(m){return m.cat===activeCat;});
+  var modes=MODES.filter(function(m){return m.cat===activeCat;});
   modes.forEach(function(m){
     var b=stats.bests[m.id]||0;
     var p=stats.plays[m.id]||0;
@@ -307,8 +369,10 @@ function renderHome(){
   document.getElementById('totalAccuracy').textContent = acc;
   const mins = Math.round((stats.timeTrained||0)/60);
   document.getElementById('totalTime').textContent = mins+'m';
-  renderCatTabs();
-  renderModes();
+  // Reset to home view
+  document.getElementById('homeCategories').style.display='block';
+  document.getElementById('categoryScreen').style.display='none';
+  activeCat=null;
 }
 
 // ── Mode start ──
@@ -1147,7 +1211,8 @@ function showGridLit(){
   area.innerHTML=
     '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+( gmQ+1)+' / '+gmTotal+'</div>'+
     '<div style="font-size:14px;color:var(--text2);font-weight:500">Memorize the pattern</div>'+
-    '<div class="gm-grid" style="grid-template-columns:repeat('+gmSize+',1fr)">'+cells+'</div>';
+    '<div class="gm-grid" style="grid-template-columns:repeat('+gmSize+',1fr)">'+cells+'</div>'+
+    '<button class="submit-btn" style="max-width:200px;visibility:hidden">Check</button>';
   // Show for a duration then hide
   var showTime = Math.max(1200, 2000 - gmQ*100);
   setTimeout(function(){ showGridInput(); }, showTime);
