@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230a0a0a'/><text y='22' x='7' font-size='17' font-weight='700' fill='white' font-family='serif'>H</text></svg>"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
 :root{
@@ -22,8 +22,8 @@
   --shadow:0 1px 3px rgba(0,0,0,.06);
   --shadow-card:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
   --r:12px;--r-sm:8px;--r-lg:16px;--r-xl:24px;
-  --sans:'DM Sans',system-ui,sans-serif;
-  --serif:'Source Serif 4',Georgia,serif;
+  --sans:'Plus Jakarta Sans',system-ui,sans-serif;
+  --serif:'Plus Jakarta Sans',system-ui,sans-serif;
 }
 html,body{height:100%;min-height:100vh}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px}
@@ -131,6 +131,20 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
 .doodle{display:block;margin-bottom:14px}
 .hero-doodles{position:relative;display:flex;justify-content:center;gap:40px;margin-bottom:-10px;margin-top:8px;opacity:.18;pointer-events:none}
 .hero-doodle{flex-shrink:0}
+.cat-tabs{display:flex;gap:4px;justify-content:center;padding:0 24px 16px;flex-wrap:wrap}
+.cat-tab{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .12s}
+.cat-tab:hover{border-color:var(--border2);color:var(--text)}
+.cat-tab.on{background:var(--text);color:var(--white);border-color:var(--text)}
+.cat-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;padding:0 24px;margin-bottom:8px;max-width:720px;margin-left:auto;margin-right:auto;width:100%}
+.gm-grid{display:grid;gap:6px;width:100%;max-width:280px;margin:0 auto}
+.gm-cell{aspect-ratio:1;border-radius:var(--r-sm);border:1.5px solid var(--border2);background:var(--bg);cursor:pointer;transition:all .15s}
+.gm-cell.lit{background:var(--text);border-color:var(--text)}
+.gm-cell.selected{background:var(--blue-light);border-color:var(--blue)}
+.gm-cell.correct{background:var(--green-light);border-color:var(--green)}
+.gm-cell.wrong{background:var(--red-light);border-color:var(--red)}
+.gm-cell.missed{background:var(--amber-bg);border-color:var(--amber)}
+.flash-num{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--text);letter-spacing:.05em;animation:flashPop .15s ease}
+@keyframes flashPop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -156,55 +170,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
     <div class="stat-pill"><div class="val" id="totalAccuracy">&mdash;</div><div class="lbl">Accuracy</div></div>
     <div class="stat-pill"><div class="val" id="totalTime">0m</div><div class="lbl">Trained</div></div>
   </div>
-  <div class="modes-grid">
-    <div class="mode-card orange" onclick="startMode('math')">
-      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="32" height="32" rx="8" stroke="#0a0a0a" stroke-width="1.5"/><text x="12" y="18" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">2+3</text><line x1="10" y1="24" x2="30" y2="24" stroke="#0a0a0a" stroke-width="1"/><text x="16" y="34" font-family="serif" font-size="12" font-weight="700" fill="#0a0a0a">5</text></svg>
-      <div class="mode-name">Math Sprint</div>
-      <div class="mode-desc">Rapid-fire arithmetic. Addition, subtraction, multiplication, division &mdash; timed and relentless.</div>
-      <div class="mode-meta"><span class="mode-best" id="best-math">Best: &mdash;</span><span class="mode-plays" id="plays-math">0 plays</span><button class="play-btn">Play</button></div>
-    </div>
-    <div class="mode-card blue" onclick="startMode('memory')">
-      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 6 C12 6 6 12 6 20 C6 28 14 34 20 38 C26 34 34 28 34 20 C34 12 28 6 20 6" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><circle cx="15" cy="18" r="2.5" fill="#0a0a0a"/><circle cx="25" cy="18" r="2.5" fill="#0a0a0a"/><path d="M14 26 Q20 32 26 26" stroke="#0a0a0a" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
-      <div class="mode-name">Number Memory</div>
-      <div class="mode-desc">See a number sequence, remember it, type it back. Gets longer as you level up.</div>
-      <div class="mode-meta"><span class="mode-best" id="best-memory">Best: &mdash;</span><span class="mode-plays" id="plays-memory">0 plays</span><button class="play-btn">Play</button></div>
-    </div>
-    <div class="mode-card green" onclick="startMode('patterns')">
-      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="8" cy="32" r="3" fill="#0a0a0a"/><circle cx="16" cy="24" r="3" fill="#0a0a0a"/><circle cx="24" cy="16" r="3" fill="#0a0a0a"/><circle cx="32" cy="8" r="3" stroke="#0a0a0a" stroke-width="1.5" stroke-dasharray="2 2"/><line x1="10" y1="30" x2="14" y2="26" stroke="#0a0a0a" stroke-width="1.2"/><line x1="18" y1="22" x2="22" y2="18" stroke="#0a0a0a" stroke-width="1.2"/><line x1="26" y1="14" x2="30" y2="10" stroke="#0a0a0a" stroke-width="1.2" stroke-dasharray="2 2"/></svg>
-      <div class="mode-name">Number Patterns</div>
-      <div class="mode-desc">Find the rule. What comes next in the sequence? Trains logical reasoning and pattern recognition.</div>
-      <div class="mode-meta"><span class="mode-best" id="best-patterns">Best: &mdash;</span><span class="mode-plays" id="plays-patterns">0 plays</span><button class="play-btn">Play</button></div>
-    </div>
-    <div class="mode-card purple" onclick="startMode('chains')">
-      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><ellipse cx="14" cy="20" rx="10" ry="7" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><ellipse cx="26" cy="20" rx="10" ry="7" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><path d="M20 14 L20 13 M20 27 L20 26" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <div class="mode-name">Mental Chains</div>
-      <div class="mode-desc">Start with a number, apply operations in your head. Builds working memory under pressure.</div>
-      <div class="mode-meta"><span class="mode-best" id="best-chains">Best: &mdash;</span><span class="mode-plays" id="plays-chains">0 plays</span><button class="play-btn">Play</button></div>
-    </div>
-    <div class="mode-card orange" onclick="startMode('rapid')">
-      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="12" cy="20" r="9" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><circle cx="28" cy="20" r="9" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="9" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">7</text><text x="25" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">4</text><text x="18" y="12" font-family="serif" font-size="10" font-weight="700" fill="#0a0a0a">&gt;</text></svg>
-      <div class="mode-name">Rapid Comparison</div>
-      <div class="mode-desc">Two numbers flash. Tap the bigger one. Sounds easy &mdash; gets insanely fast. Trains snap judgment.</div>
-      <div class="mode-meta"><span class="mode-best" id="best-rapid">Best: &mdash;</span><span class="mode-plays" id="plays-rapid">0 plays</span><button class="play-btn">Play</button></div>
-    </div>
-    <div class="mode-card green" onclick="startMode('fermi')">
-      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M8 32 L20 8 L32 32 Z" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="16" y="28" font-family="serif" font-size="9" font-weight="700" fill="#0a0a0a">~</text><circle cx="20" cy="20" r="3" stroke="#0a0a0a" stroke-width="1.2" stroke-dasharray="2 2"/></svg>
-      <div class="mode-name">Fermi Estimation</div>
-      <div class="mode-desc">Don't calculate &mdash; estimate. How close can you get? Builds the intuition that wins interviews.</div>
-      <div class="mode-meta"><span class="mode-best" id="best-fermi">Best: &mdash;</span><span class="mode-plays" id="plays-fermi">0 plays</span><button class="play-btn">Play</button></div>
-    </div>
-    <div class="mode-card blue" onclick="startMode('operator')">
-      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="32" height="32" rx="8" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="8" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">8</text><text x="16" y="24" font-family="serif" font-size="14" font-weight="700" fill="#0a0a0a">?</text><text x="24" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">4</text><line x1="8" y1="30" x2="32" y2="30" stroke="#0a0a0a" stroke-width="1"/><text x="14" y="38" font-family="serif" font-size="10" font-weight="700" fill="#0a0a0a">= 32</text></svg>
-      <div class="mode-name">Operator Hunt</div>
-      <div class="mode-desc">Given the numbers and result, find the missing operator. Gets harder with chained operations.</div>
-      <div class="mode-meta"><span class="mode-best" id="best-operator">Best: &mdash;</span><span class="mode-plays" id="plays-operator">0 plays</span><button class="play-btn">Play</button></div>
-    </div>
-    <div class="mode-card purple" onclick="startMode('truefalse')">
-      <svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M8 20 L16 28 L32 12" stroke="#0a0a0a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="22" y1="22" x2="34" y2="34" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/><line x1="34" y1="22" x2="22" y2="34" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <div class="mode-name">True or False</div>
-      <div class="mode-desc">A math statement flashes. Is it true or false? Builds snap evaluation and mental verification.</div>
-      <div class="mode-meta"><span class="mode-best" id="best-truefalse">Best: &mdash;</span><span class="mode-plays" id="plays-truefalse">0 plays</span><button class="play-btn">Play</button></div>
-    </div>
+  <div class="cat-tabs" id="catTabs"></div>
+  <div id="modesContainer">
+    <div class="modes-grid" id="modesGrid"></div>
   </div>
 </div>
 <div class="screen" id="gameScreen">
@@ -270,6 +238,66 @@ function show(id){
 
 function goHome(){ show('homeScreen'); renderHome(); }
 
+var MODES = [
+  {id:'math',name:'Math Sprint',cat:'Speed',color:'orange',
+   desc:'Rapid-fire arithmetic. Addition, subtraction, multiplication, division — timed and relentless.',
+   svg:'<rect x="4" y="4" width="32" height="32" rx="8" stroke="#0a0a0a" stroke-width="1.5"/><text x="12" y="18" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">2+3</text><line x1="10" y1="24" x2="30" y2="24" stroke="#0a0a0a" stroke-width="1"/><text x="16" y="34" font-family="serif" font-size="12" font-weight="700" fill="#0a0a0a">5</text>'},
+  {id:'rapid',name:'Rapid Comparison',cat:'Speed',color:'orange',
+   desc:'Two numbers flash. Tap the bigger one. Gets insanely fast. Trains snap judgment.',
+   svg:'<circle cx="12" cy="20" r="9" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><circle cx="28" cy="20" r="9" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="9" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">7</text><text x="25" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">4</text>'},
+  {id:'truefalse',name:'True or False',cat:'Speed',color:'orange',
+   desc:'A math statement flashes. Is it true or false? Builds snap evaluation.',
+   svg:'<path d="M8 20 L16 28 L32 12" stroke="#0a0a0a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="24" y1="24" x2="34" y2="34" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/><line x1="34" y1="24" x2="24" y2="34" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>'},
+  {id:'memory',name:'Number Memory',cat:'Memory',color:'blue',
+   desc:'See a number sequence, remember it, type it back. Gets longer as you level up.',
+   svg:'<path d="M20 6 C12 6 6 12 6 20 C6 28 14 34 20 38 C26 34 34 28 34 20 C34 12 28 6 20 6" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><circle cx="15" cy="18" r="2.5" fill="#0a0a0a"/><circle cx="25" cy="18" r="2.5" fill="#0a0a0a"/><path d="M14 26 Q20 32 26 26" stroke="#0a0a0a" stroke-width="1.5" fill="none" stroke-linecap="round"/>'},
+  {id:'gridmem',name:'Grid Memory',cat:'Memory',color:'blue',
+   desc:'Cells light up on a grid, then disappear. Tap which ones were lit. Grid grows over time.',
+   svg:'<rect x="4" y="4" width="12" height="12" rx="2" stroke="#0a0a0a" stroke-width="1.2" fill="#0a0a0a"/><rect x="20" y="4" width="12" height="12" rx="2" stroke="#0a0a0a" stroke-width="1.2" fill="none"/><rect x="4" y="20" width="12" height="12" rx="2" stroke="#0a0a0a" stroke-width="1.2" fill="none"/><rect x="20" y="20" width="12" height="12" rx="2" stroke="#0a0a0a" stroke-width="1.2" fill="#0a0a0a"/>'},
+  {id:'flashnum',name:'Flash Number',cat:'Memory',color:'blue',
+   desc:'A number flashes for half a second. Type what you saw. Gets more digits as you improve.',
+   svg:'<circle cx="20" cy="20" r="15" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="11" y="25" font-family="serif" font-size="14" font-weight="700" fill="#0a0a0a">42</text><path d="M8 8 L12 4 M32 8 L28 4" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>'},
+  {id:'patterns',name:'Number Patterns',cat:'Logic',color:'green',
+   desc:'Find the rule. What comes next in the sequence? Trains logical reasoning.',
+   svg:'<circle cx="8" cy="32" r="3" fill="#0a0a0a"/><circle cx="16" cy="24" r="3" fill="#0a0a0a"/><circle cx="24" cy="16" r="3" fill="#0a0a0a"/><circle cx="32" cy="8" r="3" stroke="#0a0a0a" stroke-width="1.5" stroke-dasharray="2 2"/><line x1="10" y1="30" x2="14" y2="26" stroke="#0a0a0a" stroke-width="1.2"/><line x1="18" y1="22" x2="22" y2="18" stroke="#0a0a0a" stroke-width="1.2"/>'},
+  {id:'chains',name:'Mental Chains',cat:'Logic',color:'green',
+   desc:'Start with a number, apply operations in your head. Builds working memory under pressure.',
+   svg:'<ellipse cx="14" cy="20" rx="10" ry="7" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><ellipse cx="26" cy="20" rx="10" ry="7" stroke="#0a0a0a" stroke-width="1.5" fill="none"/>'},
+  {id:'operator',name:'Operator Hunt',cat:'Logic',color:'green',
+   desc:'Given the numbers and result, find the missing operator. Gets harder with chained operations.',
+   svg:'<rect x="4" y="4" width="32" height="32" rx="8" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="8" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">8</text><text x="16" y="24" font-family="serif" font-size="14" font-weight="700" fill="#0a0a0a">?</text><text x="24" y="24" font-family="serif" font-size="11" font-weight="700" fill="#0a0a0a">4</text>'},
+  {id:'fermi',name:'Fermi Estimation',cat:'Logic',color:'green',
+   desc:"Don't calculate — estimate. How close can you get? Builds interview intuition.",
+   svg:'<path d="M8 32 L20 8 L32 32 Z" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="16" y="28" font-family="serif" font-size="9" font-weight="700" fill="#0a0a0a">~</text><circle cx="20" cy="20" r="3" stroke="#0a0a0a" stroke-width="1.2" stroke-dasharray="2 2"/>'},
+];
+var activeCat = 'all';
+
+function renderCatTabs(){
+  var tabs=document.getElementById('catTabs');
+  var cats=['all','Speed','Memory','Logic'];
+  tabs.innerHTML=cats.map(function(c){
+    return '<button class="cat-tab'+(activeCat===c?' on':'')+'" onclick="activeCat=\''+c+'\';renderCatTabs();renderModes()">'+( c==='all'?'All':c)+'</button>';
+  }).join('');
+}
+
+function renderModes(){
+  var grid=document.getElementById('modesGrid');
+  grid.innerHTML='';
+  var modes=activeCat==='all'?MODES:MODES.filter(function(m){return m.cat===activeCat;});
+  modes.forEach(function(m){
+    var b=stats.bests[m.id]||0;
+    var p=stats.plays[m.id]||0;
+    var card=document.createElement('div');
+    card.className='mode-card '+m.color;
+    card.onclick=function(){startMode(m.id)};
+    card.innerHTML='<svg class="doodle" width="40" height="40" viewBox="0 0 40 40" fill="none">'+m.svg+'</svg>'+
+      '<div class="mode-name">'+m.name+'</div>'+
+      '<div class="mode-desc">'+m.desc+'</div>'+
+      '<div class="mode-meta"><span class="mode-best" id="best-'+m.id+'">'+(b?'Best: '+b:'Best: —')+'</span><span class="mode-plays" id="plays-'+m.id+'">'+p+' play'+(p!==1?'s':'')+'</span><button class="play-btn">Play</button></div>';
+    grid.appendChild(card);
+  });
+}
+
 function renderHome(){
   updateStreak();
   document.getElementById('streakCount').textContent = stats.streak||0;
@@ -279,18 +307,14 @@ function renderHome(){
   document.getElementById('totalAccuracy').textContent = acc;
   const mins = Math.round((stats.timeTrained||0)/60);
   document.getElementById('totalTime').textContent = mins+'m';
-  ['math','memory','patterns','chains','rapid','fermi','operator','truefalse'].forEach(m=>{
-    const b=stats.bests[m]||0;
-    const p=stats.plays[m]||0;
-    document.getElementById('best-'+m).textContent = b ? 'Best: '+b : 'Best: —';
-    document.getElementById('plays-'+m).textContent = p+' play'+(p!==1?'s':'');
-  });
+  renderCatTabs();
+  renderModes();
 }
 
 // ── Mode start ──
 function startMode(mode){
   currentMode=mode;
-  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation',operator:'Operator Hunt',truefalse:'True or False'};
+  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation',operator:'Operator Hunt',truefalse:'True or False',gridmem:'Grid Memory',flashnum:'Flash Number'};
   document.getElementById('gameTitle').textContent=titles[mode];
   show('gameScreen');
   countdown(()=>initMode(mode));
@@ -333,6 +357,8 @@ function initMode(mode){
   else if(mode==='fermi') initFermi();
   else if(mode==='operator') initOperator();
   else if(mode==='truefalse') initTrueFalse();
+  else if(mode==='gridmem') initGridMem();
+  else if(mode==='flashnum') initFlashNum();
 }
 
 function initMath(){
@@ -1085,6 +1111,166 @@ function endTF(){
   finishSession(session.correct,session.attempts,elapsed,session.correct);
 }
 
+// ══════════════════════════════
+// GRID MEMORY
+// ══════════════════════════════
+let gmSize=4, gmLit=[], gmSelected=[], gmQ=0, gmTotal=8, gmExpectedCount=3;
+
+function initGridMem(){
+  gmSize=4; gmQ=0; gmExpectedCount=3;
+  setScore(0); setProgress(0,gmTotal);
+  nextGridMem();
+}
+
+function nextGridMem(){
+  if(gmQ>=gmTotal){ endGridMem(); return; }
+  // Increase difficulty
+  gmExpectedCount = Math.min(3 + Math.floor(gmQ/2), 8);
+  if(gmQ>=6) gmSize=5;
+  // Pick random cells to light up
+  var totalCells = gmSize*gmSize;
+  gmLit=[]; gmSelected=[];
+  while(gmLit.length<gmExpectedCount){
+    var c=randInt(0,totalCells-1);
+    if(gmLit.indexOf(c)<0) gmLit.push(c);
+  }
+  setProgress(gmQ,gmTotal);
+  showGridLit();
+}
+
+function showGridLit(){
+  var area=document.getElementById('gameArea');
+  var cells='';
+  for(var i=0;i<gmSize*gmSize;i++){
+    cells+='<div class="gm-cell'+(gmLit.indexOf(i)>=0?' lit':'')+'"></div>';
+  }
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+( gmQ+1)+' / '+gmTotal+'</div>'+
+    '<div style="font-size:14px;color:var(--text2);font-weight:500">Memorize the pattern</div>'+
+    '<div class="gm-grid" style="grid-template-columns:repeat('+gmSize+',1fr)">'+cells+'</div>';
+  // Show for a duration then hide
+  var showTime = Math.max(1200, 2000 - gmQ*100);
+  setTimeout(function(){ showGridInput(); }, showTime);
+}
+
+function showGridInput(){
+  var area=document.getElementById('gameArea');
+  var cells='';
+  for(var i=0;i<gmSize*gmSize;i++){
+    cells+='<div class="gm-cell" data-idx="'+i+'" onclick="toggleGridCell('+i+',this)"></div>';
+  }
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(gmQ+1)+' / '+gmTotal+'</div>'+
+    '<div style="font-size:14px;color:var(--text2);font-weight:500">Tap the cells that were lit ('+gmExpectedCount+')</div>'+
+    '<div class="gm-grid" style="grid-template-columns:repeat('+gmSize+',1fr)">'+cells+'</div>'+
+    '<button class="submit-btn" style="max-width:200px" onclick="checkGridMem()">Check</button>';
+}
+
+function toggleGridCell(idx, el){
+  var pos=gmSelected.indexOf(idx);
+  if(pos>=0){
+    gmSelected.splice(pos,1);
+    el.classList.remove('selected');
+  } else {
+    gmSelected.push(idx);
+    el.classList.add('selected');
+  }
+}
+
+function checkGridMem(){
+  session.attempts++;
+  var allCorrect=true;
+  // Show results on grid
+  document.querySelectorAll('.gm-cell').forEach(function(cell){
+    var idx=parseInt(cell.dataset.idx);
+    cell.onclick=null;
+    cell.style.cursor='default';
+    var wasLit=gmLit.indexOf(idx)>=0;
+    var wasSelected=gmSelected.indexOf(idx)>=0;
+    if(wasLit&&wasSelected) cell.className='gm-cell correct';
+    else if(!wasLit&&wasSelected){ cell.className='gm-cell wrong'; allCorrect=false; }
+    else if(wasLit&&!wasSelected){ cell.className='gm-cell missed'; allCorrect=false; }
+  });
+  if(allCorrect){
+    session.correct++;
+    setScore(session.correct);
+  }
+  gmQ++;
+  setProgress(gmQ,gmTotal);
+  setTimeout(function(){ nextGridMem(); }, 1000);
+}
+
+function endGridMem(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+// ══════════════════════════════
+// FLASH NUMBER
+// ══════════════════════════════
+let fnDigits=3, fnQ=0, fnTotal=10, fnCurrent='';
+
+function initFlashNum(){
+  fnDigits=3; fnQ=0;
+  setScore(0); setProgress(0,fnTotal);
+  nextFlashNum();
+}
+
+function nextFlashNum(){
+  if(fnQ>=fnTotal){ endFlashNum(); return; }
+  // Generate number with fnDigits
+  var num='';
+  for(var i=0;i<fnDigits;i++) num+=randInt(i===0?1:0,9);
+  fnCurrent=num;
+  setProgress(fnQ,fnTotal);
+  // Show the number briefly
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(fnQ+1)+' / '+fnTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">Remember this number</div><div class="flash-num">'+num+'</div></div>';
+  var flashTime = Math.max(400, 800 - fnQ*40);
+  setTimeout(function(){ showFlashInput(); }, flashTime);
+}
+
+function showFlashInput(){
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(fnQ+1)+' / '+fnTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">What was the number?</div><div style="font-family:var(--serif);font-size:32px;color:var(--text3)">'+fnCurrent.replace(/./g,'•')+'</div></div>'+
+    '<input class="answer-input" id="fnInput" type="number" inputmode="numeric" placeholder="Type it" autocomplete="off"/>'+
+    '<div id="fnFeedback" style="height:32px"></div>'+
+    '<button class="submit-btn" onclick="checkFlashNum()">Submit</button>';
+  var inp=document.getElementById('fnInput');
+  inp.focus();
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter') checkFlashNum(); });
+}
+
+function checkFlashNum(){
+  var inp=document.getElementById('fnInput');
+  var val=(inp.value||'').trim();
+  if(!val) return;
+  session.attempts++;
+  var fb=document.getElementById('fnFeedback');
+  if(val===fnCurrent){
+    session.correct++; fnQ++;
+    if(fnQ%3===0) fnDigits++; // Increase digits every 3 correct
+    setScore(session.correct); setProgress(fnQ,fnTotal);
+    inp.classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">✓ Correct!</div>';
+    setTimeout(function(){ nextFlashNum(); },500);
+  } else {
+    fnQ++; setProgress(fnQ,fnTotal);
+    inp.classList.add('wrong');
+    fb.innerHTML='<div class="feedback-chip wrong">✗ Was '+fnCurrent+'</div>';
+    setTimeout(function(){ nextFlashNum(); },800);
+  }
+}
+
+function endFlashNum(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
 // ── Finish ──
 function finishSession(correct,attempts,elapsed,score){
   clearInterval(mathTimer);
@@ -1098,8 +1284,8 @@ function finishSession(correct,attempts,elapsed,score){
   saveStats();
 
   const acc=attempts?Math.round(correct/attempts*100):0;
-  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!',operator:'Hunt complete!',truefalse:'Quick thinker!'};
-  const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗',rapid:'👁️',fermi:'🎯',operator:'🔍',truefalse:'✅'};
+  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!',operator:'Hunt complete!',truefalse:'Quick thinker!',gridmem:'Grid cleared!',flashnum:'Sharp eyes!'};
+  const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗',rapid:'👁️',fermi:'🎯',operator:'🔍',truefalse:'✅',gridmem:'🟦',flashnum:'💡'};
   document.getElementById('resultsEmoji').textContent=emojis[currentMode];
   document.getElementById('resultsTitle').textContent=titles[currentMode];
   document.getElementById('resultsSub').textContent=`${correct} correct out of ${attempts} attempts`;
