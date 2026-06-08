@@ -163,6 +163,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
 @keyframes flashPop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
 .code-block-game{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;font-family:'Geist Mono',monospace,monospace;font-size:13px;color:var(--text);line-height:1.7;text-align:left;white-space:pre;overflow-x:auto;margin:0;width:100%}
 .code-block-game .kw{color:#7c3aed}.code-block-game .fn{color:#2563eb}.code-block-game .cm{color:var(--text3);font-style:italic}.code-block-game .st{color:#16a34a}.code-block-game .num{color:#d97706}
+.q-arabic{font-size:26px;line-height:1.8;direction:rtl;font-family:'Scheherazade New',serif;color:var(--text);margin-bottom:8px}
+.q-arabic-lg{font-size:30px}
+.q-ref{font-size:12px;color:var(--text3);font-weight:500;margin-top:6px}
 </style>
 </head>
 <body>
@@ -224,6 +227,15 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
           <div class="cat-desc">Algorithm analysis and code reading under pressure</div>
         </div>
         <div class="cat-count" id="catCount-Code">2 games</div>
+        <div class="cat-arrow">→</div>
+      </div>
+      <div class="cat-card" onclick="openCategory('Quran')">
+        <div class="cat-icon" style="background:#e6fdf8">🕌</div>
+        <div class="cat-info">
+          <div class="cat-name">Quran</div>
+          <div class="cat-desc">Build reading speed, translation recall, and surah recognition</div>
+        </div>
+        <div class="cat-count" id="catCount-Quran">3 games</div>
         <div class="cat-arrow">→</div>
       </div>
     </div>
@@ -339,6 +351,15 @@ var MODES = [
   {id:'output',name:'Output Prediction',cat:'Code',color:'purple',
    desc:'Read a code snippet, predict the output. Tricky edge cases that test real understanding.',
    svg:'<rect x="4" y="4" width="32" height="32" rx="6" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="8" y="16" font-family="monospace" font-size="8" fill="#0a0a0a">&gt;_</text><line x1="8" y1="22" x2="28" y2="22" stroke="#0a0a0a" stroke-width="1" opacity=".3"/><line x1="8" y1="28" x2="20" y2="28" stroke="#0a0a0a" stroke-width="1" opacity=".3"/>'},
+  {id:'ayahmatch',name:'Ayah Translation',cat:'Quran',color:'green',
+   desc:'See an ayah in Arabic, pick the correct English translation. Builds comprehension fast.',
+   svg:'<rect x="4" y="4" width="32" height="14" rx="4" stroke="#0a0a0a" stroke-width="1.2" fill="none"/><rect x="4" y="22" width="32" height="14" rx="4" stroke="#0a0a0a" stroke-width="1.2" fill="none"/><line x1="20" y1="18" x2="20" y2="22" stroke="#0a0a0a" stroke-width="1.2"/>'},
+  {id:'fillgap',name:'Fill the Gap',cat:'Quran',color:'green',
+   desc:'An ayah with one word missing. Pick the correct word. Tests deep familiarity.',
+   svg:'<text x="4" y="20" font-family="serif" font-size="14" fill="#0a0a0a">___</text><text x="4" y="36" font-family="serif" font-size="10" fill="#0a0a0a">?</text><circle cx="30" cy="28" r="8" stroke="#0a0a0a" stroke-width="1.2" fill="none"/>'},
+  {id:'surahid',name:'Surah Identifier',cat:'Quran',color:'green',
+   desc:'See an ayah, identify which surah it belongs to. Builds navigation instinct.',
+   svg:'<path d="M10 4 L10 36 M10 4 C10 4 30 4 30 14 C30 24 10 24 10 24" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><circle cx="26" cy="32" r="5" stroke="#0a0a0a" stroke-width="1.2" fill="none"/><text x="23" y="35" font-family="serif" font-size="7" fill="#0a0a0a">?</text>'},
 ];
 var activeCat = null;
 var CAT_DESCS = {Speed:'Rapid-fire drills for processing speed',Memory:'Train recall and visual memory',Logic:'Patterns, estimation, and reasoning'};
@@ -395,7 +416,7 @@ function renderHome(){
 // ── Mode start ──
 function startMode(mode){
   currentMode=mode;
-  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation',operator:'Operator Hunt',truefalse:'True or False',gridmem:'Grid Memory',flashnum:'Flash Number',bigo:'Big O Snap',output:'Output Prediction'};
+  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation',operator:'Operator Hunt',truefalse:'True or False',gridmem:'Grid Memory',flashnum:'Flash Number',bigo:'Big O Snap',output:'Output Prediction',ayahmatch:'Ayah Translation',fillgap:'Fill the Gap',surahid:'Surah Identifier'};
   document.getElementById('gameTitle').textContent=titles[mode];
   show('gameScreen');
   countdown(()=>initMode(mode));
@@ -442,6 +463,9 @@ function initMode(mode){
   else if(mode==='flashnum') initFlashNum();
   else if(mode==='bigo') initBigO();
   else if(mode==='output') initOutput();
+  else if(mode==='ayahmatch') initAyahMatch();
+  else if(mode==='fillgap') initFillGap();
+  else if(mode==='surahid') initSurahId();
 }
 
 function initMath(){
@@ -1523,6 +1547,207 @@ function endOutput(){
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function escAttr(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+// ══════════════════════════════
+// QURAN GAME DATA
+// ══════════════════════════════
+var AYAH_DATA = [
+  {ar:"\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u0651\u064e\u0647\u0650 \u0627\u0644\u0631\u0651\u064e\u062d\u0652\u0645\u064e\u0670\u0646\u0650 \u0627\u0644\u0631\u0651\u064e\u062d\u0650\u064a\u0645\u0650",en:"In the name of Allah, the Most Merciful, the Most Compassionate",surah:"Al-Fatiha",key:"\u0627\u0644\u0631\u0651\u064e\u062d\u0652\u0645\u064e\u0670\u0646\u0650"},
+  {ar:"\u0627\u0644\u0652\u062d\u064e\u0645\u0652\u062f\u064f \u0644\u0650\u0644\u0651\u064e\u0647\u0650 \u0631\u064e\u0628\u0651\u0650 \u0627\u0644\u0652\u0639\u064e\u0627\u0644\u064e\u0645\u0650\u064a\u0646\u064e",en:"All praise is due to Allah, Lord of the worlds",surah:"Al-Fatiha",key:"\u0631\u064e\u0628\u0651\u0650"},
+  {ar:"\u0645\u064e\u0627\u0644\u0650\u0643\u0650 \u064a\u064e\u0648\u0652\u0645\u0650 \u0627\u0644\u062f\u0651\u0650\u064a\u0646\u0650",en:"Master of the Day of Judgement",surah:"Al-Fatiha",key:"\u064a\u064e\u0648\u0652\u0645\u0650"},
+  {ar:"\u0625\u0650\u064a\u0651\u064e\u0627\u0643\u064e \u0646\u064e\u0639\u0652\u0628\u064f\u062f\u064f \u0648\u064e\u0625\u0650\u064a\u0651\u064e\u0627\u0643\u064e \u0646\u064e\u0633\u0652\u062a\u064e\u0639\u0650\u064a\u0646\u064f",en:"You alone we worship, and You alone we ask for help",surah:"Al-Fatiha",key:"\u0646\u064e\u0639\u0652\u0628\u064f\u062f\u064f"},
+  {ar:"\u0627\u0647\u0652\u062f\u0650\u0646\u064e\u0627 \u0627\u0644\u0635\u0651\u0650\u0631\u064e\u0627\u0637\u064e \u0627\u0644\u0652\u0645\u064f\u0633\u0652\u062a\u064e\u0642\u0650\u064a\u0645\u064e",en:"Guide us to the straight path",surah:"Al-Fatiha",key:"\u0627\u0644\u0635\u0651\u0650\u0631\u064e\u0627\u0637\u064e"},
+  {ar:"\u0630\u064e\u0670\u0644\u0650\u0643\u064e \u0627\u0644\u0652\u0643\u0650\u062a\u064e\u0627\u0628\u064f \u0644\u064e\u0627 \u0631\u064e\u064a\u0652\u0628\u064e \u0641\u0650\u064a\u0647\u0650",en:"This is the Book in which there is no doubt",surah:"Al-Baqarah",key:"\u0627\u0644\u0652\u0643\u0650\u062a\u064e\u0627\u0628\u064f"},
+  {ar:"\u0627\u0644\u0644\u0651\u064e\u0647\u064f \u0644\u064e\u0627 \u0625\u0650\u0644\u064e\u0670\u0647\u064e \u0625\u0650\u0644\u0651\u064e\u0627 \u0647\u064f\u0648\u064e \u0627\u0644\u0652\u062d\u064e\u064a\u0651\u064f \u0627\u0644\u0652\u0642\u064e\u064a\u0651\u064f\u0648\u0645\u064f",en:"Allah, there is no god except Him, the Ever-Living, the Self-Sustaining",surah:"Al-Baqarah",key:"\u0627\u0644\u0652\u062d\u064e\u064a\u0651\u064f"},
+  {ar:"\u0644\u064e\u0627 \u0625\u0650\u0643\u0652\u0631\u064e\u0627\u0647\u064e \u0641\u0650\u064a \u0627\u0644\u062f\u0651\u0650\u064a\u0646\u0650",en:"There is no compulsion in religion",surah:"Al-Baqarah",key:"\u0625\u0650\u0643\u0652\u0631\u064e\u0627\u0647\u064e"},
+  {ar:"\u0648\u064e\u0625\u0650\u0646 \u062a\u064e\u0639\u064f\u062f\u0651\u064f\u0648\u0627 \u0646\u0650\u0639\u0652\u0645\u064e\u0629\u064e \u0627\u0644\u0644\u0651\u064e\u0647\u0650 \u0644\u064e\u0627 \u062a\u064f\u062d\u0652\u0635\u064f\u0648\u0647\u064e\u0627",en:"And if you should count the favors of Allah, you could not enumerate them",surah:"Ibrahim",key:"\u0646\u0650\u0639\u0652\u0645\u064e\u0629\u064e"},
+  {ar:"\u0625\u0650\u0646\u0651\u064e \u0645\u064e\u0639\u064e \u0627\u0644\u0652\u0639\u064f\u0633\u0652\u0631\u0650 \u064a\u064f\u0633\u0652\u0631\u064b\u0627",en:"Indeed, with hardship comes ease",surah:"Ash-Sharh",key:"\u064a\u064f\u0633\u0652\u0631\u064b\u0627"},
+  {ar:"\u0648\u064e\u0644\u064e\u0642\u064e\u062f\u0652 \u064a\u064e\u0633\u0651\u064e\u0631\u0652\u0646\u064e\u0627 \u0627\u0644\u0652\u0642\u064f\u0631\u0652\u0622\u0646\u064e \u0644\u0650\u0644\u0630\u0651\u0650\u0643\u0652\u0631\u0650",en:"And We have made the Quran easy for remembrance",surah:"Al-Qamar",key:"\u0627\u0644\u0652\u0642\u064f\u0631\u0652\u0622\u0646\u064e"},
+  {ar:"\u0642\u064f\u0644\u0652 \u0647\u064f\u0648\u064e \u0627\u0644\u0644\u0651\u064e\u0647\u064f \u0623\u064e\u062d\u064e\u062f\u064c",en:"Say: He is Allah, the One",surah:"Al-Ikhlas",key:"\u0623\u064e\u062d\u064e\u062f\u064c"},
+  {ar:"\u0627\u0644\u0644\u0651\u064e\u0647\u064f \u0627\u0644\u0635\u0651\u064e\u0645\u064e\u062f\u064f",en:"Allah, the Eternal Refuge",surah:"Al-Ikhlas",key:"\u0627\u0644\u0635\u0651\u064e\u0645\u064e\u062f\u064f"},
+  {ar:"\u0642\u064f\u0644\u0652 \u0623\u064e\u0639\u064f\u0648\u0630\u064f \u0628\u0650\u0631\u064e\u0628\u0651\u0650 \u0627\u0644\u0652\u0641\u064e\u0644\u064e\u0642\u0650",en:"Say: I seek refuge in the Lord of the daybreak",surah:"Al-Falaq",key:"\u0627\u0644\u0652\u0641\u064e\u0644\u064e\u0642\u0650"},
+  {ar:"\u0642\u064f\u0644\u0652 \u0623\u064e\u0639\u064f\u0648\u0630\u064f \u0628\u0650\u0631\u064e\u0628\u0651\u0650 \u0627\u0644\u0646\u0651\u064e\u0627\u0633\u0650",en:"Say: I seek refuge in the Lord of mankind",surah:"An-Nas",key:"\u0627\u0644\u0646\u0651\u064e\u0627\u0633\u0650"},
+  {ar:"\u0625\u0650\u0646\u0651\u064e\u0627 \u0623\u064e\u0639\u0652\u0637\u064e\u064a\u0652\u0646\u064e\u0627\u0643\u064e \u0627\u0644\u0652\u0643\u064e\u0648\u0652\u062b\u064e\u0631\u064e",en:"Indeed, We have granted you Al-Kawthar",surah:"Al-Kawthar",key:"\u0627\u0644\u0652\u0643\u064e\u0648\u0652\u062b\u064e\u0631\u064e"},
+  {ar:"\u0625\u0650\u0646\u0651\u064e\u0627 \u0623\u064e\u0646\u0632\u064e\u0644\u0652\u0646\u064e\u0627\u0647\u064f \u0641\u0650\u064a \u0644\u064e\u064a\u0652\u0644\u064e\u0629\u0650 \u0627\u0644\u0652\u0642\u064e\u062f\u0652\u0631\u0650",en:"Indeed, We sent it down during the Night of Decree",surah:"Al-Qadr",key:"\u0627\u0644\u0652\u0642\u064e\u062f\u0652\u0631\u0650"},
+  {ar:"\u0623\u064e\u0644\u064e\u0645\u0652 \u0646\u064e\u0634\u0652\u0631\u064e\u062d\u0652 \u0644\u064e\u0643\u064e \u0635\u064e\u062f\u0652\u0631\u064e\u0643\u064e",en:"Did We not expand for you your chest?",surah:"Ash-Sharh",key:"\u0635\u064e\u062f\u0652\u0631\u064e\u0643\u064e"},
+  {ar:"\u0648\u064e\u0627\u0644\u0652\u0639\u064e\u0635\u0652\u0631\u0650 \u0625\u0650\u0646\u0651\u064e \u0627\u0644\u0652\u0625\u0650\u0646\u0633\u064e\u0627\u0646\u064e \u0644\u064e\u0641\u0650\u064a \u062e\u064f\u0633\u0652\u0631\u064d",en:"By time, indeed mankind is in loss",surah:"Al-Asr",key:"\u062e\u064f\u0633\u0652\u0631\u064d"},
+  {ar:"\u0641\u064e\u0628\u0650\u0623\u064e\u064a\u0651\u0650 \u0622\u0644\u064e\u0627\u0621\u0650 \u0631\u064e\u0628\u0651\u0650\u0643\u064f\u0645\u064e\u0627 \u062a\u064f\u0643\u064e\u0630\u0651\u0650\u0628\u064e\u0627\u0646\u0650",en:"So which of the favors of your Lord would you deny?",surah:"Ar-Rahman",key:"\u0622\u0644\u064e\u0627\u0621\u0650"},
+  {ar:"\u0625\u0650\u0646\u0651\u064e \u0627\u0644\u0644\u0651\u064e\u0647\u064e \u0645\u064e\u0639\u064e \u0627\u0644\u0635\u0651\u064e\u0627\u0628\u0650\u0631\u0650\u064a\u0646\u064e",en:"Indeed, Allah is with the patient",surah:"Al-Baqarah",key:"\u0627\u0644\u0635\u0651\u064e\u0627\u0628\u0650\u0631\u0650\u064a\u0646\u064e"},
+  {ar:"\u0648\u064e\u0645\u064e\u0646 \u064a\u064e\u062a\u064e\u0648\u064e\u0643\u0651\u064e\u0644\u0652 \u0639\u064e\u0644\u064e\u0649 \u0627\u0644\u0644\u0651\u064e\u0647\u0650 \u0641\u064e\u0647\u064f\u0648\u064e \u062d\u064e\u0633\u0652\u0628\u064f\u0647\u064f",en:"And whoever relies upon Allah, then He is sufficient for him",surah:"At-Talaq",key:"\u064a\u064e\u062a\u064e\u0648\u064e\u0643\u0651\u064e\u0644\u0652"},
+  {ar:"\u0644\u064e\u0626\u0650\u0646 \u0634\u064e\u0643\u064e\u0631\u0652\u062a\u064f\u0645\u0652 \u0644\u064e\u0623\u064e\u0632\u0650\u064a\u062f\u064e\u0646\u0651\u064e\u0643\u064f\u0645\u0652",en:"If you are grateful, I will surely increase you",surah:"Ibrahim",key:"\u0634\u064e\u0643\u064e\u0631\u0652\u062a\u064f\u0645\u0652"},
+  {ar:"\u0648\u064e\u0642\u064f\u0644 \u0631\u0651\u064e\u0628\u0651\u0650 \u0632\u0650\u062f\u0652\u0646\u0650\u064a \u0639\u0650\u0644\u0652\u0645\u064b\u0627",en:"And say: My Lord, increase me in knowledge",surah:"Ta-Ha",key:"\u0639\u0650\u0644\u0652\u0645\u064b\u0627"},
+];
+
+// ══════════════════════════════
+// AYAH TRANSLATION MATCH
+// ══════════════════════════════
+var amQ=0, amTotal=10, amUsed=[];
+
+function initAyahMatch(){
+  amQ=0; amUsed=[];
+  setScore(0); setProgress(0,amTotal);
+  nextAyahMatch();
+}
+
+function nextAyahMatch(){
+  if(amQ>=amTotal){ endAyahMatch(); return; }
+  var available=AYAH_DATA.filter(function(_,i){return amUsed.indexOf(i)<0;});
+  if(available.length<4){ amUsed=[]; available=AYAH_DATA.slice(); }
+  var idx=Math.floor(Math.random()*available.length);
+  var q=available[idx];
+  amUsed.push(AYAH_DATA.indexOf(q));
+  // Generate wrong translations
+  var wrongs=AYAH_DATA.filter(function(a){return a.en!==q.en;}).sort(function(){return Math.random()-.5;}).slice(0,3).map(function(a){return a.en;});
+  var opts=[q.en].concat(wrongs).sort(function(){return Math.random()-.5;});
+  setProgress(amQ,amTotal);
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(amQ+1)+' / '+amTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">What does this ayah mean?</div><div class="q-arabic">'+q.ar+'</div><div class="q-ref">'+q.surah+'</div></div>'+
+    '<div style="display:flex;flex-direction:column;gap:8px;width:100%">'+opts.map(function(o){
+      return '<button class="option-btn" style="font-size:13px;text-align:left;padding:12px 16px;font-family:var(--sans);font-weight:500" onclick="checkAyahMatch(this)" data-val="'+escAttr(o)+'" data-ans="'+escAttr(q.en)+'">'+escHtml(o)+'</button>';
+    }).join('')+'</div>'+
+    '<div id="amFb" style="height:28px;display:flex;align-items:center;justify-content:center"></div>';
+}
+
+function checkAyahMatch(btn){
+  var picked=btn.dataset.val, answer=btn.dataset.ans;
+  document.querySelectorAll('.option-btn').forEach(function(b){b.disabled=true;});
+  session.attempts++;
+  var fb=document.getElementById('amFb');
+  if(picked===answer){
+    session.correct++; amQ++;
+    setScore(session.correct); setProgress(amQ,amTotal);
+    btn.classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">Correct!</div>';
+  } else {
+    amQ++; setProgress(amQ,amTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(function(b){if(b.dataset.val===answer)b.classList.add('correct');});
+    fb.innerHTML='<div class="feedback-chip wrong">Not quite</div>';
+  }
+  setTimeout(function(){nextAyahMatch();},1000);
+}
+
+function endAyahMatch(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+// ══════════════════════════════
+// FILL THE GAP
+// ══════════════════════════════
+var fgQ=0, fgTotal=10, fgUsed=[];
+
+function initFillGap(){
+  fgQ=0; fgUsed=[];
+  setScore(0); setProgress(0,fgTotal);
+  nextFillGap();
+}
+
+function nextFillGap(){
+  if(fgQ>=fgTotal){ endFillGap(); return; }
+  var available=AYAH_DATA.filter(function(_,i){return fgUsed.indexOf(i)<0;});
+  if(available.length<4){ fgUsed=[]; available=AYAH_DATA.slice(); }
+  var idx=Math.floor(Math.random()*available.length);
+  var q=available[idx];
+  fgUsed.push(AYAH_DATA.indexOf(q));
+  // The key word is blanked out
+  var blanked=q.ar.replace(q.key,'______');
+  // Wrong options from other ayahs' key words
+  var wrongs=AYAH_DATA.filter(function(a){return a.key!==q.key;}).sort(function(){return Math.random()-.5;}).slice(0,3).map(function(a){return a.key;});
+  var opts=[q.key].concat(wrongs).sort(function(){return Math.random()-.5;});
+  setProgress(fgQ,fgTotal);
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(fgQ+1)+' / '+fgTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">Fill in the missing word</div><div class="q-arabic">'+blanked+'</div><div style="font-size:12px;color:var(--text2);margin-top:6px">'+escHtml(q.en)+'</div><div class="q-ref">'+q.surah+'</div></div>'+
+    '<div class="options-grid">'+opts.map(function(o){
+      return '<button class="option-btn" style="font-size:20px;direction:rtl" onclick="checkFillGap(this)" data-val="'+escAttr(o)+'" data-ans="'+escAttr(q.key)+'">'+o+'</button>';
+    }).join('')+'</div>'+
+    '<div id="fgFb" style="height:28px;display:flex;align-items:center;justify-content:center"></div>';
+}
+
+function checkFillGap(btn){
+  var picked=btn.dataset.val, answer=btn.dataset.ans;
+  document.querySelectorAll('.option-btn').forEach(function(b){b.disabled=true;});
+  session.attempts++;
+  var fb=document.getElementById('fgFb');
+  if(picked===answer){
+    session.correct++; fgQ++;
+    setScore(session.correct); setProgress(fgQ,fgTotal);
+    btn.classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">Correct!</div>';
+  } else {
+    fgQ++; setProgress(fgQ,fgTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(function(b){if(b.dataset.val===answer)b.classList.add('correct');});
+    fb.innerHTML='<div class="feedback-chip wrong">Not quite</div>';
+  }
+  setTimeout(function(){nextFillGap();},1000);
+}
+
+function endFillGap(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+// ══════════════════════════════
+// SURAH IDENTIFIER
+// ══════════════════════════════
+var siQ=0, siTotal=10, siUsed=[];
+
+function initSurahId(){
+  siQ=0; siUsed=[];
+  setScore(0); setProgress(0,siTotal);
+  nextSurahId();
+}
+
+function nextSurahId(){
+  if(siQ>=siTotal){ endSurahId(); return; }
+  var available=AYAH_DATA.filter(function(_,i){return siUsed.indexOf(i)<0;});
+  if(available.length<4){ siUsed=[]; available=AYAH_DATA.slice(); }
+  var idx=Math.floor(Math.random()*available.length);
+  var q=available[idx];
+  siUsed.push(AYAH_DATA.indexOf(q));
+  // Get unique surah names for wrong options
+  var allSurahs=[]; AYAH_DATA.forEach(function(a){if(allSurahs.indexOf(a.surah)<0)allSurahs.push(a.surah);});
+  var wrongs=allSurahs.filter(function(s){return s!==q.surah;}).sort(function(){return Math.random()-.5;}).slice(0,3);
+  var opts=[q.surah].concat(wrongs).sort(function(){return Math.random()-.5;});
+  setProgress(siQ,siTotal);
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(siQ+1)+' / '+siTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">Which surah is this from?</div><div class="q-arabic q-arabic-lg">'+q.ar+'</div><div style="font-size:12px;color:var(--text2);margin-top:6px">'+escHtml(q.en)+'</div></div>'+
+    '<div class="options-grid">'+opts.map(function(o){
+      return '<button class="option-btn" style="font-size:15px" onclick="checkSurahId(this)" data-val="'+escAttr(o)+'" data-ans="'+escAttr(q.surah)+'">'+escHtml(o)+'</button>';
+    }).join('')+'</div>'+
+    '<div id="siFb" style="height:28px;display:flex;align-items:center;justify-content:center"></div>';
+}
+
+function checkSurahId(btn){
+  var picked=btn.dataset.val, answer=btn.dataset.ans;
+  document.querySelectorAll('.option-btn').forEach(function(b){b.disabled=true;});
+  session.attempts++;
+  var fb=document.getElementById('siFb');
+  if(picked===answer){
+    session.correct++; siQ++;
+    setScore(session.correct); setProgress(siQ,siTotal);
+    btn.classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">Correct!</div>';
+  } else {
+    siQ++; setProgress(siQ,siTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(function(b){if(b.dataset.val===answer)b.classList.add('correct');});
+    fb.innerHTML='<div class="feedback-chip wrong">It was '+escHtml(answer)+'</div>';
+  }
+  setTimeout(function(){nextSurahId();},1000);
+}
+
+function endSurahId(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
 // ── Finish ──
 function finishSession(correct,attempts,elapsed,score){
   clearInterval(mathTimer);
@@ -1536,8 +1761,8 @@ function finishSession(correct,attempts,elapsed,score){
   saveStats();
 
   const acc=attempts?Math.round(correct/attempts*100):0;
-  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!',operator:'Hunt complete!',truefalse:'Quick thinker!',gridmem:'Grid cleared!',flashnum:'Sharp eyes!',bigo:'Complexity mastered!',output:'Code reader!'};
-  const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗',rapid:'👁️',fermi:'🎯',operator:'🔍',truefalse:'✅',gridmem:'🟦',flashnum:'💡',bigo:'📊',output:'💻'};
+  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!',operator:'Hunt complete!',truefalse:'Quick thinker!',gridmem:'Grid cleared!',flashnum:'Sharp eyes!',bigo:'Complexity mastered!',output:'Code reader!',ayahmatch:'MashaAllah!',fillgap:'Well memorized!',surahid:'Surah scholar!'};
+  const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗',rapid:'👁️',fermi:'🎯',operator:'🔍',truefalse:'✅',gridmem:'🟦',flashnum:'💡',bigo:'📊',output:'💻',ayahmatch:'📖',fillgap:'✨',surahid:'🕌'};
   document.getElementById('resultsEmoji').textContent=emojis[currentMode];
   document.getElementById('resultsTitle').textContent=titles[currentMode];
   document.getElementById('resultsSub').textContent=`${correct} correct out of ${attempts} attempts`;
