@@ -235,7 +235,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
           <div class="cat-name">Quran</div>
           <div class="cat-desc">Build reading speed, translation recall, and surah recognition</div>
         </div>
-        <div class="cat-count" id="catCount-Quran">3 games</div>
+        <div class="cat-count" id="catCount-Quran">7 games</div>
         <div class="cat-arrow">→</div>
       </div>
     </div>
@@ -359,7 +359,19 @@ var MODES = [
    svg:'<text x="4" y="20" font-family="serif" font-size="14" fill="#0a0a0a">___</text><text x="4" y="36" font-family="serif" font-size="10" fill="#0a0a0a">?</text><circle cx="30" cy="28" r="8" stroke="#0a0a0a" stroke-width="1.2" fill="none"/>'},
   {id:'surahid',name:'Surah Identifier',cat:'Quran',color:'green',
    desc:'See an ayah, identify which surah it belongs to. Builds navigation instinct.',
-   svg:'<path d="M10 4 L10 36 M10 4 C10 4 30 4 30 14 C30 24 10 24 10 24" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><circle cx="26" cy="32" r="5" stroke="#0a0a0a" stroke-width="1.2" fill="none"/><text x="23" y="35" font-family="serif" font-size="7" fill="#0a0a0a">?</text>'},
+   svg:'<path d="M10 4 L10 36 M10 4 C10 4 30 4 30 14 C30 24 10 24 10 24" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><circle cx="26" cy="32" r="5" stroke="#0a0a0a" stroke-width="1.2" fill="none"/><text x="23" y="35" font-family="serif" font-size="7" fill="#0a0a0a">?</text>'},,
+  {id:'letterflash',name:'Letter Flash',cat:'Quran',color:'green',
+   desc:'A letter appears in connected form. Which letter is it? Drills the pairs that trip you up.',
+   svg:'<text x="10" y="30" font-size="24" fill="#0a0a0a" font-family="serif">\u0628</text><text x="28" y="16" font-size="12" fill="#0a0a0a">?</text>'},
+  {id:'worddecode',name:'Word Decode',cat:'Quran',color:'green',
+   desc:'A voweled Arabic word appears. Pick the correct transliteration. Forces real reading.',
+   svg:'<rect x="4" y="8" width="32" height="24" rx="6" stroke="#0a0a0a" stroke-width="1.2" fill="none"/><text x="12" y="24" font-size="10" fill="#0a0a0a" font-family="serif">\u0643\u064e</text><line x1="10" y1="34" x2="30" y2="34" stroke="#0a0a0a" stroke-width="1" stroke-dasharray="2 2"/>'},
+  {id:'wordflash',name:'Common Word Flash',cat:'Quran',color:'green',
+   desc:'The most frequent Quranic words, rapid fire. See Arabic, pick the meaning. Pure repetition.',
+   svg:'<circle cx="20" cy="20" r="14" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="13" y="24" font-size="12" fill="#0a0a0a" font-family="serif">\u0642\u0644</text>'},
+  {id:'positiontr',name:'Position Trainer',cat:'Quran',color:'green',
+   desc:'See a letter form — is it initial, medial, final, or isolated? Master how letters change shape.',
+   svg:'<text x="2" y="16" font-size="10" fill="#0a0a0a" font-family="serif">بـ</text><text x="18" y="16" font-size="10" fill="#0a0a0a" font-family="serif">ـبـ</text><text x="2" y="34" font-size="10" fill="#0a0a0a" font-family="serif">ـب</text><text x="18" y="34" font-size="10" fill="#0a0a0a" font-family="serif">ب</text>'},
 ];
 var activeCat = null;
 var CAT_DESCS = {Speed:'Rapid-fire drills for processing speed',Memory:'Train recall and visual memory',Logic:'Patterns, estimation, and reasoning'};
@@ -416,7 +428,7 @@ function renderHome(){
 // ── Mode start ──
 function startMode(mode){
   currentMode=mode;
-  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation',operator:'Operator Hunt',truefalse:'True or False',gridmem:'Grid Memory',flashnum:'Flash Number',bigo:'Big O Snap',output:'Output Prediction',ayahmatch:'Ayah Translation',fillgap:'Fill the Gap',surahid:'Surah Identifier'};
+  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation',operator:'Operator Hunt',truefalse:'True or False',gridmem:'Grid Memory',flashnum:'Flash Number',bigo:'Big O Snap',output:'Output Prediction',ayahmatch:'Ayah Translation',fillgap:'Fill the Gap',surahid:'Surah Identifier',letterflash:'Letter Flash',worddecode:'Word Decode',wordflash:'Common Word Flash',positiontr:'Position Trainer'};
   document.getElementById('gameTitle').textContent=titles[mode];
   show('gameScreen');
   countdown(()=>initMode(mode));
@@ -466,6 +478,10 @@ function initMode(mode){
   else if(mode==='ayahmatch') initAyahMatch();
   else if(mode==='fillgap') initFillGap();
   else if(mode==='surahid') initSurahId();
+  else if(mode==='letterflash') initLetterFlash();
+  else if(mode==='worddecode') initWordDecode();
+  else if(mode==='wordflash') initWordFlash();
+  else if(mode==='positiontr') initPositionTr();
 }
 
 function initMath(){
@@ -1748,6 +1764,362 @@ function endSurahId(){
   finishSession(session.correct,session.attempts,elapsed,session.correct);
 }
 
+
+// ══════════════════════════════
+// LETTER FLASH
+// ══════════════════════════════
+var LETTER_GROUPS = [
+  {letters:[{name:'Ba',ar:'\u0628'},{name:'Ta',ar:'\u062a'},{name:'Tha',ar:'\u062b'},{name:'Nun',ar:'\u0646'}]},
+  {letters:[{name:'Jim',ar:'\u062c'},{name:'Ha',ar:'\u062d'},{name:'Kha',ar:'\u062e'}]},
+  {letters:[{name:'Dal',ar:'\u062f'},{name:'Dhal',ar:'\u0630'}]},
+  {letters:[{name:'Ra',ar:'\u0631'},{name:'Zay',ar:'\u0632'}]},
+  {letters:[{name:'Sin',ar:'\u0633'},{name:'Shin',ar:'\u0634'}]},
+  {letters:[{name:'Sad',ar:'\u0635'},{name:'Dad',ar:'\u0636'}]},
+  {letters:[{name:'Taa',ar:'\u0637'},{name:'Dhaa',ar:'\u0638'}]},
+  {letters:[{name:'Ayn',ar:'\u0639'},{name:'Ghayn',ar:'\u063a'}]},
+  {letters:[{name:'Fa',ar:'\u0641'},{name:'Qaf',ar:'\u0642'}]},
+  {letters:[{name:'Kaf',ar:'\u0643'},{name:'Lam',ar:'\u0644'}]},
+  {letters:[{name:'Ha',ar:'\u0647'},{name:'Ta Marbuta',ar:'\u0629'}]},
+  {letters:[{name:'Waw',ar:'\u0648'},{name:'Ya',ar:'\u064a'}]},
+  {letters:[{name:'Alif',ar:'\u0627'},{name:'Hamza',ar:'\u0621'}]},
+  {letters:[{name:'Mim',ar:'\u0645'}]},
+];
+var ALL_LETTERS=[];LETTER_GROUPS.forEach(function(g){g.letters.forEach(function(l){ALL_LETTERS.push(l);});});
+
+var lfQ=0, lfTotal=15;
+
+function initLetterFlash(){
+  lfQ=0; setScore(0); setProgress(0,lfTotal);
+  nextLetterFlash();
+}
+
+function nextLetterFlash(){
+  if(lfQ>=lfTotal){ endLetterFlash(); return; }
+  var target=ALL_LETTERS[Math.floor(Math.random()*ALL_LETTERS.length)];
+  // Find its confusable group
+  var group=LETTER_GROUPS.filter(function(g){return g.letters.some(function(l){return l.ar===target.ar;});})[0];
+  // Build options: target + confusables + random others
+  var opts=[target];
+  group.letters.forEach(function(l){if(l.ar!==target.ar&&opts.length<4)opts.push(l);});
+  while(opts.length<4){
+    var r=ALL_LETTERS[Math.floor(Math.random()*ALL_LETTERS.length)];
+    if(!opts.some(function(o){return o.ar===r.ar;})) opts.push(r);
+  }
+  opts.sort(function(){return Math.random()-.5;});
+  setProgress(lfQ,lfTotal);
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(lfQ+1)+' / '+lfTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">Which letter is this?</div><div style="font-size:72px;line-height:1.2;direction:rtl;margin:12px 0">'+target.ar+'</div></div>'+
+    '<div class="options-grid">'+opts.map(function(o){
+      return '<button class="option-btn" style="font-size:15px;display:flex;align-items:center;gap:10px;justify-content:center" onclick="checkLetterFlash(this)" data-val="'+o.name+'" data-ans="'+target.name+'"><span style="font-size:24px">'+o.ar+'</span> '+o.name+'</button>';
+    }).join('')+'</div>'+
+    '<div id="lfFb" style="height:28px;display:flex;align-items:center;justify-content:center"></div>';
+}
+
+function checkLetterFlash(btn){
+  var picked=btn.dataset.val, answer=btn.dataset.ans;
+  document.querySelectorAll('.option-btn').forEach(function(b){b.disabled=true;});
+  session.attempts++;
+  var fb=document.getElementById('lfFb');
+  if(picked===answer){
+    session.correct++; lfQ++;
+    setScore(session.correct); setProgress(lfQ,lfTotal);
+    btn.classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">\u2713 '+answer+'</div>';
+  } else {
+    lfQ++; setProgress(lfQ,lfTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(function(b){if(b.dataset.val===answer)b.classList.add('correct');});
+    fb.innerHTML='<div class="feedback-chip wrong">\u2717 Was '+answer+'</div>';
+  }
+  setTimeout(function(){nextLetterFlash();},700);
+}
+
+function endLetterFlash(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+// ══════════════════════════════
+// WORD DECODE
+// ══════════════════════════════
+var DECODE_WORDS = [
+  {ar:'\u0643\u064e\u062a\u064e\u0628\u064e',rom:'kataba',en:'he wrote'},
+  {ar:'\u064a\u064e\u0643\u0652\u062a\u064f\u0628\u064f',rom:'yaktubu',en:'he writes'},
+  {ar:'\u0639\u064e\u0644\u0650\u0645\u064e',rom:"'alima",en:'he knew'},
+  {ar:'\u064a\u064e\u0639\u0652\u0644\u064e\u0645\u064f',rom:"ya'lamu",en:'he knows'},
+  {ar:'\u0642\u064e\u0627\u0644\u064e',rom:'qaala',en:'he said'},
+  {ar:'\u064a\u064e\u0642\u064f\u0648\u0644\u064f',rom:'yaquulu',en:'he says'},
+  {ar:'\u062c\u064e\u0639\u064e\u0644\u064e',rom:"ja'ala",en:'he made'},
+  {ar:'\u062f\u064e\u062e\u064e\u0644\u064e',rom:'dakhala',en:'he entered'},
+  {ar:'\u062e\u064e\u0631\u064e\u062c\u064e',rom:'kharaja',en:'he exited'},
+  {ar:'\u0633\u064e\u0645\u0650\u0639\u064e',rom:"sami'a",en:'he heard'},
+  {ar:'\u0630\u064e\u0647\u064e\u0628\u064e',rom:'dhahaba',en:'he went'},
+  {ar:'\u0623\u064e\u062e\u064e\u0630\u064e',rom:'akhadha',en:'he took'},
+  {ar:'\u0631\u064e\u062d\u0650\u064a\u0645\u064c',rom:'raheemun',en:'merciful'},
+  {ar:'\u0639\u064e\u0638\u0650\u064a\u0645\u064c',rom:"'adheemun",en:'great'},
+  {ar:'\u0635\u064e\u0627\u0644\u0650\u062d\u064c',rom:'saalihun',en:'righteous'},
+  {ar:'\u0645\u064f\u0633\u0652\u0644\u0650\u0645\u064c',rom:'muslimun',en:'muslim'},
+  {ar:'\u0643\u064e\u0631\u0650\u064a\u0645\u064c',rom:'kareemun',en:'generous'},
+  {ar:'\u0635\u064e\u0628\u0652\u0631\u064c',rom:'sabrun',en:'patience'},
+  {ar:'\u0634\u064f\u0643\u0652\u0631\u064c',rom:'shukrun',en:'gratitude'},
+  {ar:'\u0646\u064e\u0635\u0652\u0631\u064c',rom:'nasrun',en:'victory'},
+  {ar:'\u062d\u064e\u0642\u0651\u064c',rom:'haqqun',en:'truth'},
+  {ar:'\u0646\u064f\u0648\u0631\u064c',rom:'nuurun',en:'light'},
+  {ar:'\u0642\u064e\u0644\u0652\u0628\u064c',rom:'qalbun',en:'heart'},
+  {ar:'\u0639\u064e\u0628\u0652\u062f\u064c',rom:"'abdun",en:'servant'},
+];
+
+var wdQ=0, wdTotal=12, wdUsed=[];
+
+function initWordDecode(){
+  wdQ=0; wdUsed=[];
+  setScore(0); setProgress(0,wdTotal);
+  nextWordDecode();
+}
+
+function nextWordDecode(){
+  if(wdQ>=wdTotal){ endWordDecode(); return; }
+  var available=DECODE_WORDS.filter(function(_,i){return wdUsed.indexOf(i)<0;});
+  if(available.length<4){ wdUsed=[]; available=DECODE_WORDS.slice(); }
+  var idx=Math.floor(Math.random()*available.length);
+  var q=available[idx];
+  wdUsed.push(DECODE_WORDS.indexOf(q));
+  var wrongs=DECODE_WORDS.filter(function(w){return w.rom!==q.rom;}).sort(function(){return Math.random()-.5;}).slice(0,3).map(function(w){return w.rom;});
+  var opts=[q.rom].concat(wrongs).sort(function(){return Math.random()-.5;});
+  setProgress(wdQ,wdTotal);
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(wdQ+1)+' / '+wdTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">How is this word read?</div><div style="font-size:48px;line-height:1.3;direction:rtl;margin:8px 0">'+q.ar+'</div><div style="font-size:12px;color:var(--text3)">'+escHtml(q.en)+'</div></div>'+
+    '<div class="options-grid">'+opts.map(function(o){
+      return '<button class="option-btn" style="font-size:16px;font-family:var(--sans)" onclick="checkWordDecode(this)" data-val="'+escAttr(o)+'" data-ans="'+escAttr(q.rom)+'">'+escHtml(o)+'</button>';
+    }).join('')+'</div>'+
+    '<div id="wdFb" style="height:28px;display:flex;align-items:center;justify-content:center"></div>';
+}
+
+function checkWordDecode(btn){
+  var picked=btn.dataset.val, answer=btn.dataset.ans;
+  document.querySelectorAll('.option-btn').forEach(function(b){b.disabled=true;});
+  session.attempts++;
+  var fb=document.getElementById('wdFb');
+  if(picked===answer){
+    session.correct++; wdQ++;
+    setScore(session.correct); setProgress(wdQ,wdTotal);
+    btn.classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">\u2713 '+escHtml(answer)+'</div>';
+  } else {
+    wdQ++; setProgress(wdQ,wdTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(function(b){if(b.dataset.val===answer)b.classList.add('correct');});
+    fb.innerHTML='<div class="feedback-chip wrong">\u2717 Was '+escHtml(answer)+'</div>';
+  }
+  setTimeout(function(){nextWordDecode();},800);
+}
+
+function endWordDecode(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+// ══════════════════════════════
+// COMMON WORD FLASH
+// ══════════════════════════════
+var COMMON_WORDS = [
+  {ar:'\u0627\u0644\u0644\u0647',en:'Allah / God'},
+  {ar:'\u0631\u0628',en:'Lord'},
+  {ar:'\u0642\u0627\u0644',en:'He said'},
+  {ar:'\u0643\u0627\u0646',en:'He was'},
+  {ar:'\u0639\u0644\u0649',en:'Upon / On'},
+  {ar:'\u0645\u0646',en:'From / Who'},
+  {ar:'\u0641\u064a',en:'In'},
+  {ar:'\u0645\u0627',en:'What / Not'},
+  {ar:'\u0625\u0644\u0649',en:'To / Towards'},
+  {ar:'\u0623\u0646',en:'That / To'},
+  {ar:'\u0647\u0645',en:'They (m)'},
+  {ar:'\u0644\u0627',en:'No / Not'},
+  {ar:'\u0643\u0644',en:'Every / All'},
+  {ar:'\u064a\u0648\u0645',en:'Day'},
+  {ar:'\u0623\u0631\u0636',en:'Earth'},
+  {ar:'\u0633\u0645\u0627\u0621',en:'Sky / Heaven'},
+  {ar:'\u0646\u0627\u0633',en:'People'},
+  {ar:'\u0639\u0644\u0645',en:'Knowledge'},
+  {ar:'\u062d\u0642',en:'Truth / Right'},
+  {ar:'\u0646\u0648\u0631',en:'Light'},
+  {ar:'\u0642\u0644\u0628',en:'Heart'},
+  {ar:'\u062f\u064a\u0646',en:'Religion / Faith'},
+  {ar:'\u0645\u0627\u0644',en:'Wealth'},
+  {ar:'\u0645\u0648\u062a',en:'Death'},
+  {ar:'\u062d\u064a\u0627\u0629',en:'Life'},
+  {ar:'\u0635\u0644\u0627\u0629',en:'Prayer'},
+  {ar:'\u0643\u062a\u0627\u0628',en:'Book'},
+  {ar:'\u0622\u064a\u0629',en:'Sign / Verse'},
+  {ar:'\u0646\u0641\u0633',en:'Soul / Self'},
+  {ar:'\u0639\u0628\u062f',en:'Servant'},
+  {ar:'\u0623\u0645\u0631',en:'Command'},
+  {ar:'\u0645\u0644\u0643',en:'King / Angel'},
+  {ar:'\u0628\u064a\u062a',en:'House'},
+  {ar:'\u0637\u0631\u064a\u0642',en:'Path / Way'},
+  {ar:'\u0631\u062d\u0645\u0629',en:'Mercy'},
+  {ar:'\u062c\u0646\u0629',en:'Paradise'},
+  {ar:'\u0646\u0627\u0631',en:'Fire'},
+  {ar:'\u0635\u0628\u0631',en:'Patience'},
+  {ar:'\u0634\u0643\u0631',en:'Gratitude'},
+  {ar:'\u062a\u0648\u0628\u0629',en:'Repentance'},
+];
+
+var wfQ=0, wfTotal=15, wfUsed=[];
+
+function initWordFlash(){
+  wfQ=0; wfUsed=[];
+  setScore(0); setProgress(0,wfTotal);
+  nextWordFlash();
+}
+
+function nextWordFlash(){
+  if(wfQ>=wfTotal){ endWordFlash(); return; }
+  var available=COMMON_WORDS.filter(function(_,i){return wfUsed.indexOf(i)<0;});
+  if(available.length<4){ wfUsed=[]; available=COMMON_WORDS.slice(); }
+  var idx=Math.floor(Math.random()*available.length);
+  var q=available[idx];
+  wfUsed.push(COMMON_WORDS.indexOf(q));
+  var wrongs=COMMON_WORDS.filter(function(w){return w.en!==q.en;}).sort(function(){return Math.random()-.5;}).slice(0,3).map(function(w){return w.en;});
+  var opts=[q.en].concat(wrongs).sort(function(){return Math.random()-.5;});
+  setProgress(wfQ,wfTotal);
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(wfQ+1)+' / '+wfTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">What does this word mean?</div><div style="font-size:56px;line-height:1.2;direction:rtl;margin:12px 0">'+q.ar+'</div></div>'+
+    '<div class="options-grid">'+opts.map(function(o){
+      return '<button class="option-btn" style="font-size:14px;font-family:var(--sans)" onclick="checkWordFlash(this)" data-val="'+escAttr(o)+'" data-ans="'+escAttr(q.en)+'">'+escHtml(o)+'</button>';
+    }).join('')+'</div>'+
+    '<div id="wfFb" style="height:28px;display:flex;align-items:center;justify-content:center"></div>';
+}
+
+function checkWordFlash(btn){
+  var picked=btn.dataset.val, answer=btn.dataset.ans;
+  document.querySelectorAll('.option-btn').forEach(function(b){b.disabled=true;});
+  session.attempts++;
+  var fb=document.getElementById('wfFb');
+  if(picked===answer){
+    session.correct++; wfQ++;
+    setScore(session.correct); setProgress(wfQ,wfTotal);
+    btn.classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">\u2713 '+escHtml(answer)+'</div>';
+  } else {
+    wfQ++; setProgress(wfQ,wfTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(function(b){if(b.dataset.val===answer)b.classList.add('correct');});
+    fb.innerHTML='<div class="feedback-chip wrong">\u2717 '+escHtml(answer)+'</div>';
+  }
+  setTimeout(function(){nextWordFlash();},700);
+}
+
+function endWordFlash(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+
+// ══════════════════════════════
+// POSITION TRAINER
+// ══════════════════════════════
+var POSITION_LETTERS = [
+  {name:'Ba',iso:'\u0628',ini:'\u0628\u0640',med:'\u0640\u0628\u0640',fin:'\u0640\u0628'},
+  {name:'Ta',iso:'\u062a',ini:'\u062a\u0640',med:'\u0640\u062a\u0640',fin:'\u0640\u062a'},
+  {name:'Tha',iso:'\u062b',ini:'\u062b\u0640',med:'\u0640\u062b\u0640',fin:'\u0640\u062b'},
+  {name:'Jeem',iso:'\u062c',ini:'\u062c\u0640',med:'\u0640\u062c\u0640',fin:'\u0640\u062c'},
+  {name:'Ha',iso:'\u062d',ini:'\u062d\u0640',med:'\u0640\u062d\u0640',fin:'\u0640\u062d'},
+  {name:'Kha',iso:'\u062e',ini:'\u062e\u0640',med:'\u0640\u062e\u0640',fin:'\u0640\u062e'},
+  {name:'Dal',iso:'\u062f',ini:'\u062f\u0640',med:'\u0640\u062f\u0640',fin:'\u0640\u062f'},
+  {name:'Ra',iso:'\u0631',ini:'\u0631\u0640',med:'\u0640\u0631\u0640',fin:'\u0640\u0631'},
+  {name:'Sin',iso:'\u0633',ini:'\u0633\u0640',med:'\u0640\u0633\u0640',fin:'\u0640\u0633'},
+  {name:'Shin',iso:'\u0634',ini:'\u0634\u0640',med:'\u0640\u0634\u0640',fin:'\u0640\u0634'},
+  {name:'Sad',iso:'\u0635',ini:'\u0635\u0640',med:'\u0640\u0635\u0640',fin:'\u0640\u0635'},
+  {name:'Dad',iso:'\u0636',ini:'\u0636\u0640',med:'\u0640\u0636\u0640',fin:'\u0640\u0636'},
+  {name:'Taa',iso:'\u0637',ini:'\u0637\u0640',med:'\u0640\u0637\u0640',fin:'\u0640\u0637'},
+  {name:'Ayn',iso:'\u0639',ini:'\u0639\u0640',med:'\u0640\u0639\u0640',fin:'\u0640\u0639'},
+  {name:'Ghayn',iso:'\u063a',ini:'\u063a\u0640',med:'\u0640\u063a\u0640',fin:'\u0640\u063a'},
+  {name:'Fa',iso:'\u0641',ini:'\u0641\u0640',med:'\u0640\u0641\u0640',fin:'\u0640\u0641'},
+  {name:'Qaf',iso:'\u0642',ini:'\u0642\u0640',med:'\u0640\u0642\u0640',fin:'\u0640\u0642'},
+  {name:'Kaf',iso:'\u0643',ini:'\u0643\u0640',med:'\u0640\u0643\u0640',fin:'\u0640\u0643'},
+  {name:'Lam',iso:'\u0644',ini:'\u0644\u0640',med:'\u0640\u0644\u0640',fin:'\u0640\u0644'},
+  {name:'Mim',iso:'\u0645',ini:'\u0645\u0640',med:'\u0640\u0645\u0640',fin:'\u0640\u0645'},
+  {name:'Nun',iso:'\u0646',ini:'\u0646\u0640',med:'\u0640\u0646\u0640',fin:'\u0640\u0646'},
+  {name:'Ha',iso:'\u0647',ini:'\u0647\u0640',med:'\u0640\u0647\u0640',fin:'\u0640\u0647'},
+  {name:'Waw',iso:'\u0648',ini:'\u0648\u0640',med:'\u0640\u0648\u0640',fin:'\u0640\u0648'},
+  {name:'Ya',iso:'\u064a',ini:'\u064a\u0640',med:'\u0640\u064a\u0640',fin:'\u0640\u064a'},
+];
+var POS_NAMES = ['Isolated','Initial','Middle','Ending'];
+var POS_KEYS = ['iso','ini','med','fin'];
+
+var ptQ=0, ptTotal=15, ptMode=0; // ptMode: 0=identify position, 1=identify letter from form
+
+function initPositionTr(){
+  ptQ=0; setScore(0); setProgress(0,ptTotal);
+  nextPositionTr();
+}
+
+function nextPositionTr(){
+  if(ptQ>=ptTotal){ endPositionTr(); return; }
+  ptMode = Math.random() > 0.5 ? 1 : 0;
+  var letter = POSITION_LETTERS[Math.floor(Math.random()*POSITION_LETTERS.length)];
+  var posIdx = Math.floor(Math.random()*4);
+  var posKey = POS_KEYS[posIdx];
+  var posName = POS_NAMES[posIdx];
+  var form = letter[posKey];
+  setProgress(ptQ, ptTotal);
+  var area = document.getElementById('gameArea');
+
+  if(ptMode===0){
+    // Show a letter form, ask which position
+    area.innerHTML=
+      '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(ptQ+1)+' / '+ptTotal+'</div>'+
+      '<div class="question-card"><div class="q-label">What position is this '+letter.name+'?</div><div style="font-size:64px;line-height:1.3;direction:rtl;margin:12px 0">'+form+'</div></div>'+
+      '<div class="options-grid">'+POS_NAMES.map(function(p){
+        return '<button class="option-btn" style="font-size:15px" onclick="checkPositionTr(this)" data-val="'+p+'" data-ans="'+posName+'">'+p+'</button>';
+      }).join('')+'</div>'+
+      '<div id="ptFb" style="height:28px;display:flex;align-items:center;justify-content:center"></div>';
+  } else {
+    // Show a form, ask which letter it is
+    var wrongs = POSITION_LETTERS.filter(function(l){return l.name!==letter.name;}).sort(function(){return Math.random()-.5;}).slice(0,3);
+    var opts = [{name:letter.name,form:letter[posKey]}].concat(wrongs.map(function(l){return {name:l.name,form:l[posKey]};}));
+    opts.sort(function(){return Math.random()-.5;});
+    area.innerHTML=
+      '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(ptQ+1)+' / '+ptTotal+'</div>'+
+      '<div class="question-card"><div class="q-label">Which letter is this? ('+posName+' form)</div><div style="font-size:64px;line-height:1.3;direction:rtl;margin:12px 0">'+form+'</div></div>'+
+      '<div class="options-grid">'+opts.map(function(o){
+        return '<button class="option-btn" style="font-size:15px;display:flex;align-items:center;gap:8px;justify-content:center" onclick="checkPositionTr(this)" data-val="'+o.name+'" data-ans="'+letter.name+'"><span style="font-size:22px">'+o.form+'</span> '+o.name+'</button>';
+      }).join('')+'</div>'+
+      '<div id="ptFb" style="height:28px;display:flex;align-items:center;justify-content:center"></div>';
+  }
+}
+
+function checkPositionTr(btn){
+  var picked=btn.dataset.val, answer=btn.dataset.ans;
+  document.querySelectorAll('.option-btn').forEach(function(b){b.disabled=true;});
+  session.attempts++;
+  var fb=document.getElementById('ptFb');
+  if(picked===answer){
+    session.correct++; ptQ++;
+    setScore(session.correct); setProgress(ptQ,ptTotal);
+    btn.classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">\u2713 '+answer+'</div>';
+  } else {
+    ptQ++; setProgress(ptQ,ptTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(function(b){if(b.dataset.val===answer)b.classList.add('correct');});
+    fb.innerHTML='<div class="feedback-chip wrong">\u2717 Was '+answer+'</div>';
+  }
+  setTimeout(function(){nextPositionTr();},700);
+}
+
+function endPositionTr(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
 // ── Finish ──
 function finishSession(correct,attempts,elapsed,score){
   clearInterval(mathTimer);
@@ -1761,7 +2133,7 @@ function finishSession(correct,attempts,elapsed,score){
   saveStats();
 
   const acc=attempts?Math.round(correct/attempts*100):0;
-  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!',operator:'Hunt complete!',truefalse:'Quick thinker!',gridmem:'Grid cleared!',flashnum:'Sharp eyes!',bigo:'Complexity mastered!',output:'Code reader!',ayahmatch:'MashaAllah!',fillgap:'Well memorized!',surahid:'Surah scholar!'};
+  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!',operator:'Hunt complete!',truefalse:'Quick thinker!',gridmem:'Grid cleared!',flashnum:'Sharp eyes!',bigo:'Complexity mastered!',output:'Code reader!',ayahmatch:'MashaAllah!',fillgap:'Well memorized!',surahid:'Surah scholar!',letterflash:'Sharp reader!',worddecode:'Well decoded!',wordflash:'Word master!',positiontr:'Form master!'};
   const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗',rapid:'👁️',fermi:'🎯',operator:'🔍',truefalse:'✅',gridmem:'🟦',flashnum:'💡',bigo:'📊',output:'💻',ayahmatch:'📖',fillgap:'✨',surahid:'🕌'};
   document.getElementById('resultsEmoji').textContent=emojis[currentMode];
   document.getElementById('resultsTitle').textContent=titles[currentMode];
