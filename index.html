@@ -161,6 +161,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
 .gm-cell.missed{background:var(--amber-bg);border-color:var(--amber)}
 .flash-num{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--text);letter-spacing:.05em;animation:flashPop .15s ease}
 @keyframes flashPop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+.code-block-game{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;font-family:'Geist Mono',monospace,monospace;font-size:13px;color:var(--text);line-height:1.7;text-align:left;white-space:pre;overflow-x:auto;margin:0;width:100%}
+.code-block-game .kw{color:#7c3aed}.code-block-game .fn{color:#2563eb}.code-block-game .cm{color:var(--text3);font-style:italic}.code-block-game .st{color:#16a34a}.code-block-game .num{color:#d97706}
 </style>
 </head>
 <body>
@@ -213,6 +215,15 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
           <div class="cat-desc">Patterns, estimation, and reasoning under pressure</div>
         </div>
         <div class="cat-count" id="catCount-Logic">4 games</div>
+        <div class="cat-arrow">→</div>
+      </div>
+      <div class="cat-card" onclick="openCategory('Code')">
+        <div class="cat-icon" style="background:var(--purple-light)">💻</div>
+        <div class="cat-info">
+          <div class="cat-name">Code</div>
+          <div class="cat-desc">Algorithm analysis and code reading under pressure</div>
+        </div>
+        <div class="cat-count" id="catCount-Code">2 games</div>
         <div class="cat-arrow">→</div>
       </div>
     </div>
@@ -322,6 +333,12 @@ var MODES = [
   {id:'fermi',name:'Fermi Estimation',cat:'Logic',color:'green',
    desc:"Don't calculate — estimate. How close can you get? Builds interview intuition.",
    svg:'<path d="M8 32 L20 8 L32 32 Z" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="16" y="28" font-family="serif" font-size="9" font-weight="700" fill="#0a0a0a">~</text><circle cx="20" cy="20" r="3" stroke="#0a0a0a" stroke-width="1.2" stroke-dasharray="2 2"/>'},
+  {id:'bigo',name:'Big O Snap',cat:'Code',color:'purple',
+   desc:'See a code pattern, pick the time complexity. O(1)? O(n)? O(n²)? Instant decisions.',
+   svg:'<text x="4" y="28" font-family="serif" font-size="18" font-weight="700" fill="#0a0a0a">O</text><text x="18" y="32" font-family="serif" font-size="12" fill="#0a0a0a">(n)</text>'},
+  {id:'output',name:'Output Prediction',cat:'Code',color:'purple',
+   desc:'Read a code snippet, predict the output. Tricky edge cases that test real understanding.',
+   svg:'<rect x="4" y="4" width="32" height="32" rx="6" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><text x="8" y="16" font-family="monospace" font-size="8" fill="#0a0a0a">&gt;_</text><line x1="8" y1="22" x2="28" y2="22" stroke="#0a0a0a" stroke-width="1" opacity=".3"/><line x1="8" y1="28" x2="20" y2="28" stroke="#0a0a0a" stroke-width="1" opacity=".3"/>'},
 ];
 var activeCat = null;
 var CAT_DESCS = {Speed:'Rapid-fire drills for processing speed',Memory:'Train recall and visual memory',Logic:'Patterns, estimation, and reasoning'};
@@ -378,7 +395,7 @@ function renderHome(){
 // ── Mode start ──
 function startMode(mode){
   currentMode=mode;
-  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation',operator:'Operator Hunt',truefalse:'True or False',gridmem:'Grid Memory',flashnum:'Flash Number'};
+  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation',operator:'Operator Hunt',truefalse:'True or False',gridmem:'Grid Memory',flashnum:'Flash Number',bigo:'Big O Snap',output:'Output Prediction'};
   document.getElementById('gameTitle').textContent=titles[mode];
   show('gameScreen');
   countdown(()=>initMode(mode));
@@ -423,6 +440,8 @@ function initMode(mode){
   else if(mode==='truefalse') initTrueFalse();
   else if(mode==='gridmem') initGridMem();
   else if(mode==='flashnum') initFlashNum();
+  else if(mode==='bigo') initBigO();
+  else if(mode==='output') initOutput();
 }
 
 function initMath(){
@@ -1336,6 +1355,174 @@ function endFlashNum(){
   finishSession(session.correct,session.attempts,elapsed,session.correct);
 }
 
+// ══════════════════════════════
+// BIG O SNAP
+// ══════════════════════════════
+var BIG_O_QUESTIONS = [
+  {code:"Accessing an element in\nan array by index:\narr[5]",ans:"O(1)",opts:["O(1)","O(n)","O(log n)","O(n²)"]},
+  {code:"Looping through every\nelement in an array:\nfor i in range(n): ...",ans:"O(n)",opts:["O(1)","O(n)","O(log n)","O(n²)"]},
+  {code:"Nested loop:\nfor i in range(n):\n  for j in range(n):\n    ...",ans:"O(n²)",opts:["O(n)","O(n²)","O(n log n)","O(2ⁿ)"]},
+  {code:"Binary search:\nwhile low <= high:\n  mid = (low+high)//2\n  if target < arr[mid]: ...",ans:"O(log n)",opts:["O(1)","O(n)","O(log n)","O(n log n)"]},
+  {code:"Sorting with merge sort\nor Python's sorted():",ans:"O(n log n)",opts:["O(n)","O(n²)","O(n log n)","O(log n)"]},
+  {code:"Looking up a key\nin a hash map / dict:\nd[key]",ans:"O(1)",opts:["O(1)","O(n)","O(log n)","O(n²)"]},
+  {code:"Finding max in\nan unsorted array:\nmax(arr)",ans:"O(n)",opts:["O(1)","O(n)","O(log n)","O(n log n)"]},
+  {code:"Checking if element\nexists in a set:\nx in my_set",ans:"O(1)",opts:["O(1)","O(n)","O(log n)","O(n²)"]},
+  {code:"Triple nested loop:\nfor i in range(n):\n for j in range(n):\n  for k in range(n):",ans:"O(n³)",opts:["O(n²)","O(n³)","O(2ⁿ)","O(n log n)"]},
+  {code:"Iterating a linked list\nto find an element:",ans:"O(n)",opts:["O(1)","O(n)","O(log n)","O(n²)"]},
+  {code:"Inserting at the end\nof a dynamic array\n(amortized):",ans:"O(1)",opts:["O(1)","O(n)","O(log n)","O(n²)"]},
+  {code:"BFS/DFS traversal\nof a graph with\nV vertices and E edges:",ans:"O(V+E)",opts:["O(V)","O(E)","O(V+E)","O(V×E)"]},
+  {code:"Two pointers moving\ntoward each other\non a sorted array:",ans:"O(n)",opts:["O(1)","O(n)","O(n²)","O(log n)"]},
+  {code:"Generating all subsets\nof a set of n items:",ans:"O(2ⁿ)",opts:["O(n²)","O(n!)","O(2ⁿ)","O(n log n)"]},
+  {code:"Heap push or pop\noperation:",ans:"O(log n)",opts:["O(1)","O(n)","O(log n)","O(n log n)"]},
+  {code:"Loop with halving:\ni = n\nwhile i > 0:\n  i = i // 2",ans:"O(log n)",opts:["O(1)","O(n)","O(log n)","O(n²)"]},
+  {code:"Bubble sort\n(worst case):",ans:"O(n²)",opts:["O(n)","O(n²)","O(n log n)","O(n³)"]},
+  {code:"Searching in a\nbalanced BST:",ans:"O(log n)",opts:["O(1)","O(n)","O(log n)","O(n log n)"]},
+  {code:"String concatenation\nin a loop:\ns = ''\nfor c in arr: s += c",ans:"O(n²)",opts:["O(n)","O(n²)","O(n log n)","O(1)"]},
+  {code:"Fibonacci with\nmemoization\n(already computed):",ans:"O(n)",opts:["O(n)","O(2ⁿ)","O(n²)","O(log n)"]},
+];
+
+var bigoQ=0, bigoTotal=12, bigoUsed=[];
+
+function initBigO(){
+  bigoQ=0; bigoUsed=[];
+  setScore(0); setProgress(0,bigoTotal);
+  nextBigO();
+}
+
+function pickBigO(){
+  var available=BIG_O_QUESTIONS.filter(function(_,i){return bigoUsed.indexOf(i)<0;});
+  if(!available.length) bigoUsed=[];
+  available=BIG_O_QUESTIONS.filter(function(_,i){return bigoUsed.indexOf(i)<0;});
+  var idx=Math.floor(Math.random()*available.length);
+  var realIdx=BIG_O_QUESTIONS.indexOf(available[idx]);
+  bigoUsed.push(realIdx);
+  return available[idx];
+}
+
+function nextBigO(){
+  if(bigoQ>=bigoTotal){ endBigO(); return; }
+  var q=pickBigO();
+  var shuffled=q.opts.slice().sort(function(){return Math.random()-.5;});
+  setProgress(bigoQ,bigoTotal);
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(bigoQ+1)+' / '+bigoTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">What\'s the time complexity?</div><pre class="code-block-game">'+escHtml(q.code)+'</pre></div>'+
+    '<div class="options-grid">'+shuffled.map(function(o){
+      return '<button class="option-btn" style="font-size:18px" onclick="checkBigO(\''+o+'\',\''+q.ans+'\',this)">'+o+'</button>';
+    }).join('')+'</div>'+
+    '<div id="bigoFb" style="height:32px;display:flex;align-items:center;justify-content:center"></div>';
+}
+
+function checkBigO(picked,answer,btn){
+  document.querySelectorAll('.option-btn').forEach(function(b){b.disabled=true;});
+  session.attempts++;
+  var fb=document.getElementById('bigoFb');
+  if(picked===answer){
+    session.correct++; bigoQ++;
+    setScore(session.correct); setProgress(bigoQ,bigoTotal);
+    btn.classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">✓ '+answer+'</div>';
+  } else {
+    bigoQ++; setProgress(bigoQ,bigoTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(function(b){if(b.textContent===answer)b.classList.add('correct');});
+    fb.innerHTML='<div class="feedback-chip wrong">✗ Was '+answer+'</div>';
+  }
+  setTimeout(function(){nextBigO();},800);
+}
+
+function endBigO(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+// ══════════════════════════════
+// OUTPUT PREDICTION
+// ══════════════════════════════
+var OUTPUT_QUESTIONS = [
+  {code:"x = [1, 2, 3]\nx.append([4, 5])\nprint(len(x))",ans:"4",opts:["4","5","6","Error"]},
+  {code:"x = 'hello'\nprint(x[1:3])",ans:"el",opts:["he","el","ell","llo"]},
+  {code:"x = [1, 2, 3]\ny = x\ny.append(4)\nprint(len(x))",ans:"4",opts:["3","4","Error","None"]},
+  {code:"print(bool(''))",ans:"False",opts:["True","False","None","Error"]},
+  {code:"print(type(3/2).__name__)",ans:"float",opts:["int","float","double","Error"]},
+  {code:"x = {1, 2, 3, 2, 1}\nprint(len(x))",ans:"3",opts:["3","5","2","Error"]},
+  {code:"x = [0] * 3\nprint(x)",ans:"[0, 0, 0]",opts:["[0, 0, 0]","[0]","[3]","Error"]},
+  {code:"x = 'abc'\nprint(x * 2)",ans:"abcabc",opts:["abcabc","abc2","Error","abc abc"]},
+  {code:"d = {'a':1, 'b':2}\nprint(d.get('c', 0))",ans:"0",opts:["None","0","Error","'c'"]},
+  {code:"print(10 // 3)",ans:"3",opts:["3","3.33","3.0","Error"]},
+  {code:"x = [1, 2, 3]\nprint(x[-1])",ans:"3",opts:["1","3","Error","-1"]},
+  {code:"x = 'Hello'\nprint(x.lower().count('l'))",ans:"2",opts:["1","2","3","Error"]},
+  {code:"print(list(range(0, 10, 3)))",ans:"[0, 3, 6, 9]",opts:["[0, 3, 6, 9]","[0, 3, 6]","[3, 6, 9]","[0, 1, 2, 3]"]},
+  {code:"x = [3, 1, 2]\nx.sort()\nprint(x[0])",ans:"1",opts:["1","2","3","Error"]},
+  {code:"x = {'a': 1}\nx['b'] = x.get('b', 0) + 1\nprint(x['b'])",ans:"1",opts:["0","1","None","Error"]},
+  {code:"print('hello'[::-1])",ans:"olleh",opts:["olleh","hello","Error","h"]},
+  {code:"a = [1, 2]\nb = [3, 4]\nprint(a + b)",ans:"[1, 2, 3, 4]",opts:["[1, 2, 3, 4]","[4, 6]","Error","[[1,2],[3,4]]"]},
+  {code:"print(2 ** 10)",ans:"1024",opts:["20","1024","100","512"]},
+  {code:"x = [1, 2, 3, 4, 5]\nprint(x[1::2])",ans:"[2, 4]",opts:["[1, 3, 5]","[2, 4]","[2, 3]","Error"]},
+  {code:"x = 'hello world'\nprint(x.split()[1])",ans:"world",opts:["hello","world","w","Error"]},
+];
+
+var outQ=0, outTotal=10, outUsed=[];
+
+function initOutput(){
+  outQ=0; outUsed=[];
+  setScore(0); setProgress(0,outTotal);
+  nextOutput();
+}
+
+function pickOutput(){
+  var available=OUTPUT_QUESTIONS.filter(function(_,i){return outUsed.indexOf(i)<0;});
+  if(!available.length) outUsed=[];
+  available=OUTPUT_QUESTIONS.filter(function(_,i){return outUsed.indexOf(i)<0;});
+  var idx=Math.floor(Math.random()*available.length);
+  var realIdx=OUTPUT_QUESTIONS.indexOf(available[idx]);
+  outUsed.push(realIdx);
+  return available[idx];
+}
+
+function nextOutput(){
+  if(outQ>=outTotal){ endOutput(); return; }
+  var q=pickOutput();
+  var shuffled=q.opts.slice().sort(function(){return Math.random()-.5;});
+  setProgress(outQ,outTotal);
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(outQ+1)+' / '+outTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">What does this print?</div><pre class="code-block-game">'+escHtml(q.code)+'</pre></div>'+
+    '<div class="options-grid">'+shuffled.map(function(o){
+      return '<button class="option-btn" style="font-size:16px;font-family:monospace" onclick="checkOutput(this)" data-val="'+escAttr(o)+'" data-ans="'+escAttr(q.ans)+'">'+escHtml(o)+'</button>';
+    }).join('')+'</div>'+
+    '<div id="outFb" style="height:32px;display:flex;align-items:center;justify-content:center"></div>';
+}
+
+function checkOutput(btn){
+  var picked=btn.dataset.val, answer=btn.dataset.ans;
+  document.querySelectorAll('.option-btn').forEach(function(b){b.disabled=true;});
+  session.attempts++;
+  var fb=document.getElementById('outFb');
+  if(picked===answer){
+    session.correct++; outQ++;
+    setScore(session.correct); setProgress(outQ,outTotal);
+    btn.classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">✓ Correct!</div>';
+  } else {
+    outQ++; setProgress(outQ,outTotal);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(function(b){if(b.dataset.val===answer)b.classList.add('correct');});
+    fb.innerHTML='<div class="feedback-chip wrong">✗ Was '+escHtml(answer)+'</div>';
+  }
+  setTimeout(function(){nextOutput();},900);
+}
+
+function endOutput(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAttr(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
 // ── Finish ──
 function finishSession(correct,attempts,elapsed,score){
   clearInterval(mathTimer);
@@ -1349,8 +1536,8 @@ function finishSession(correct,attempts,elapsed,score){
   saveStats();
 
   const acc=attempts?Math.round(correct/attempts*100):0;
-  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!',operator:'Hunt complete!',truefalse:'Quick thinker!',gridmem:'Grid cleared!',flashnum:'Sharp eyes!'};
-  const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗',rapid:'👁️',fermi:'🎯',operator:'🔍',truefalse:'✅',gridmem:'🟦',flashnum:'💡'};
+  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!',operator:'Hunt complete!',truefalse:'Quick thinker!',gridmem:'Grid cleared!',flashnum:'Sharp eyes!',bigo:'Complexity mastered!',output:'Code reader!'};
+  const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗',rapid:'👁️',fermi:'🎯',operator:'🔍',truefalse:'✅',gridmem:'🟦',flashnum:'💡',bigo:'📊',output:'💻'};
   document.getElementById('resultsEmoji').textContent=emojis[currentMode];
   document.getElementById('resultsTitle').textContent=titles[currentMode];
   document.getElementById('resultsSub').textContent=`${correct} correct out of ${attempts} attempts`;
