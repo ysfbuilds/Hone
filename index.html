@@ -208,7 +208,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
           <div class="cat-name">Memory</div>
           <div class="cat-desc">Train recall, pattern recognition, and visual memory</div>
         </div>
-        <div class="cat-count" id="catCount-Memory">3 games</div>
+        <div class="cat-count" id="catCount-Memory">5 games</div>
         <div class="cat-arrow">→</div>
       </div>
       <div class="cat-card" onclick="openCategory('Logic')">
@@ -217,7 +217,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
           <div class="cat-name">Logic</div>
           <div class="cat-desc">Patterns, estimation, and reasoning under pressure</div>
         </div>
-        <div class="cat-count" id="catCount-Logic">4 games</div>
+        <div class="cat-count" id="catCount-Logic">5 games</div>
         <div class="cat-arrow">→</div>
       </div>
       <div class="cat-card" onclick="openCategory('Code')">
@@ -226,7 +226,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15
           <div class="cat-name">Code</div>
           <div class="cat-desc">Algorithm analysis and code reading under pressure</div>
         </div>
-        <div class="cat-count" id="catCount-Code">2 games</div>
+        <div class="cat-count" id="catCount-Code">3 games</div>
         <div class="cat-arrow">→</div>
       </div>
       <div class="cat-card" onclick="openCategory('Quran')">
@@ -372,6 +372,18 @@ var MODES = [
   {id:'positiontr',name:'Position Trainer',cat:'Quran',color:'green',
    desc:'See a letter form — is it initial, medial, final, or isolated? Master how letters change shape.',
    svg:'<text x="2" y="16" font-size="10" fill="#0a0a0a" font-family="serif">بـ</text><text x="18" y="16" font-size="10" fill="#0a0a0a" font-family="serif">ـبـ</text><text x="2" y="34" font-size="10" fill="#0a0a0a" font-family="serif">ـب</text><text x="18" y="34" font-size="10" fill="#0a0a0a" font-family="serif">ب</text>'},
+  {id:'dualstream',name:'Dual Stream',cat:'Memory',color:'blue',
+   desc:'Two number sequences flash simultaneously. Track both. Answer questions about each.',
+   svg:'<line x1="8" y1="8" x2="8" y2="32" stroke="#0a0a0a" stroke-width="1.5"/><line x1="32" y1="8" x2="32" y2="32" stroke="#0a0a0a" stroke-width="1.5"/><circle cx="8" cy="14" r="3" fill="#0a0a0a"/><circle cx="32" cy="20" r="3" fill="#0a0a0a"/><circle cx="8" cy="26" r="3" fill="#0a0a0a"/><circle cx="32" cy="28" r="3" fill="#0a0a0a"/>'},
+  {id:'chunking',name:'Chunking Trainer',cat:'Memory',color:'blue',
+   desc:'A long number flashes for 3 seconds. Recall as many digits as possible. Trains pattern chunking.',
+   svg:'<text x="2" y="16" font-family="serif" font-size="9" font-weight="700" fill="#0a0a0a">4827</text><text x="2" y="30" font-family="serif" font-size="9" font-weight="700" fill="#0a0a0a">1953</text><rect x="24" y="8" width="12" height="26" rx="3" stroke="#0a0a0a" stroke-width="1.2" fill="none" stroke-dasharray="2 2"/>'},
+  {id:'codehead',name:'Code in Your Head',cat:'Code',color:'purple',
+   desc:'A snippet appears then vanishes. Trace it mentally. Type the output. No multiple choice.',
+   svg:'<rect x="4" y="4" width="32" height="32" rx="6" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><line x1="10" y1="14" x2="24" y2="14" stroke="#0a0a0a" stroke-width="1" opacity=".4"/><line x1="10" y1="20" x2="30" y2="20" stroke="#0a0a0a" stroke-width="1" opacity=".4"/><line x1="10" y1="26" x2="18" y2="26" stroke="#0a0a0a" stroke-width="1" opacity=".4"/><text x="26" y="34" font-size="10" fill="#0a0a0a">?</text>'},
+  {id:'calibrate',name:'Confidence Calibration',cat:'Logic',color:'green',
+   desc:'Answer a question, then rate how confident you are. Tracks if your confidence matches reality.',
+   svg:'<circle cx="20" cy="20" r="14" stroke="#0a0a0a" stroke-width="1.5" fill="none"/><path d="M12 20 L18 20 L20 12 L22 28 L28 20" stroke="#0a0a0a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'},
 ];
 var activeCat = null;
 var CAT_DESCS = {Speed:'Rapid-fire drills for processing speed',Memory:'Train recall and visual memory',Logic:'Patterns, estimation, and reasoning'};
@@ -428,7 +440,7 @@ function renderHome(){
 // ── Mode start ──
 function startMode(mode){
   currentMode=mode;
-  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation',operator:'Operator Hunt',truefalse:'True or False',gridmem:'Grid Memory',flashnum:'Flash Number',bigo:'Big O Snap',output:'Output Prediction',ayahmatch:'Ayah Translation',fillgap:'Fill the Gap',surahid:'Surah Identifier',letterflash:'Letter Flash',worddecode:'Word Decode',wordflash:'Common Word Flash',positiontr:'Position Trainer'};
+  const titles={math:'Math Sprint',memory:'Number Memory',patterns:'Number Patterns',chains:'Mental Chains',rapid:'Rapid Comparison',fermi:'Fermi Estimation',operator:'Operator Hunt',truefalse:'True or False',gridmem:'Grid Memory',flashnum:'Flash Number',bigo:'Big O Snap',output:'Output Prediction',ayahmatch:'Ayah Translation',fillgap:'Fill the Gap',surahid:'Surah Identifier',letterflash:'Letter Flash',worddecode:'Word Decode',wordflash:'Common Word Flash',positiontr:'Position Trainer',dualstream:'Dual Stream',chunking:'Chunking Trainer',codehead:'Code in Your Head',calibrate:'Confidence Calibration'};
   document.getElementById('gameTitle').textContent=titles[mode];
   show('gameScreen');
   countdown(()=>initMode(mode));
@@ -482,6 +494,10 @@ function initMode(mode){
   else if(mode==='worddecode') initWordDecode();
   else if(mode==='wordflash') initWordFlash();
   else if(mode==='positiontr') initPositionTr();
+  else if(mode==='dualstream') initDualStream();
+  else if(mode==='chunking') initChunking();
+  else if(mode==='codehead') initCodeHead();
+  else if(mode==='calibrate') initCalibrate();
 }
 
 function initMath(){
@@ -2029,7 +2045,7 @@ var POSITION_LETTERS = [
   {name:'Ba',iso:'\u0628',ini:'\u0628\u0640',med:'\u0640\u0628\u0640',fin:'\u0640\u0628'},
   {name:'Ta',iso:'\u062a',ini:'\u062a\u0640',med:'\u0640\u062a\u0640',fin:'\u0640\u062a'},
   {name:'Tha',iso:'\u062b',ini:'\u062b\u0640',med:'\u0640\u062b\u0640',fin:'\u0640\u062b'},
-  {name:'Jeem',iso:'\u062c',ini:'\u062c\u0640',med:'\u0640\u062c\u0640',fin:'\u0640\u062c'},
+  {name:'Jim',iso:'\u062c',ini:'\u062c\u0640',med:'\u0640\u062c\u0640',fin:'\u0640\u062c'},
   {name:'Ha',iso:'\u062d',ini:'\u062d\u0640',med:'\u0640\u062d\u0640',fin:'\u0640\u062d'},
   {name:'Kha',iso:'\u062e',ini:'\u062e\u0640',med:'\u0640\u062e\u0640',fin:'\u0640\u062e'},
   {name:'Dal',iso:'\u062f',ini:'\u062f\u0640',med:'\u0640\u062f\u0640',fin:'\u0640\u062f'},
@@ -2051,7 +2067,7 @@ var POSITION_LETTERS = [
   {name:'Waw',iso:'\u0648',ini:'\u0648\u0640',med:'\u0640\u0648\u0640',fin:'\u0640\u0648'},
   {name:'Ya',iso:'\u064a',ini:'\u064a\u0640',med:'\u0640\u064a\u0640',fin:'\u0640\u064a'},
 ];
-var POS_NAMES = ['Isolated','Initial','Middle','Ending'];
+var POS_NAMES = ['Isolated','Initial','Medial','Final'];
 var POS_KEYS = ['iso','ini','med','fin'];
 
 var ptQ=0, ptTotal=15, ptMode=0; // ptMode: 0=identify position, 1=identify letter from form
@@ -2120,6 +2136,340 @@ function endPositionTr(){
   finishSession(session.correct,session.attempts,elapsed,session.correct);
 }
 
+
+// ══════════════════════════════
+// DUAL STREAM
+// ══════════════════════════════
+var dsQ=0, dsTotal=8, dsLeft=[], dsRight=[], dsPhase='show';
+
+function initDualStream(){
+  dsQ=0; setScore(0); setProgress(0,dsTotal);
+  nextDualStream();
+}
+
+function nextDualStream(){
+  if(dsQ>=dsTotal){ endDualStream(); return; }
+  var len=3+Math.floor(dsQ/2); // 3-6 digits per side
+  dsLeft=[]; dsRight=[];
+  for(var i=0;i<len;i++){ dsLeft.push(randInt(1,9)); dsRight.push(randInt(1,9)); }
+  setProgress(dsQ,dsTotal);
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(dsQ+1)+' / '+dsTotal+'</div>'+
+    '<div style="font-size:13px;color:var(--text2);margin-bottom:8px">Remember both sequences</div>'+
+    '<div style="display:flex;gap:24px;width:100%">'+
+      '<div class="question-card" style="flex:1;padding:20px"><div class="q-label">Left</div><div style="font-size:28px;font-weight:700;letter-spacing:.08em;font-family:var(--serif)">'+dsLeft.join(' ')+'</div></div>'+
+      '<div class="question-card" style="flex:1;padding:20px"><div class="q-label">Right</div><div style="font-size:28px;font-weight:700;letter-spacing:.08em;font-family:var(--serif)">'+dsRight.join(' ')+'</div></div>'+
+    '</div>';
+  var showTime=Math.max(2000,3000-dsQ*150);
+  setTimeout(function(){ askDualStream(); },showTime);
+}
+
+function askDualStream(){
+  // Randomly ask about left or right, and which position
+  var side=Math.random()>.5?'left':'right';
+  var seq=side==='left'?dsLeft:dsRight;
+  var pos=randInt(0,seq.length-1);
+  var ordinal=['1st','2nd','3rd','4th','5th','6th'][pos];
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(dsQ+1)+' / '+dsTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">What was the '+ordinal+' digit on the <strong>'+side+'</strong>?</div></div>'+
+    '<input class="answer-input" id="dsInput" type="number" inputmode="numeric" placeholder="?" autocomplete="off" style="max-width:120px"/>'+
+    '<button class="submit-btn" style="max-width:200px" onclick="checkDualStream('+seq[pos]+')">Submit</button>'+
+    '<div id="dsFb" style="height:28px;display:flex;align-items:center;justify-content:center"></div>';
+  document.getElementById('dsInput').focus();
+  document.getElementById('dsInput').addEventListener('keydown',function(e){if(e.key==='Enter')checkDualStream(seq[pos]);});
+}
+
+function checkDualStream(correct){
+  var val=parseInt(document.getElementById('dsInput').value);
+  session.attempts++;
+  var fb=document.getElementById('dsFb');
+  if(val===correct){
+    session.correct++; dsQ++;
+    setScore(session.correct); setProgress(dsQ,dsTotal);
+    document.getElementById('dsInput').classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">\u2713 Correct!</div>';
+  } else {
+    dsQ++; setProgress(dsQ,dsTotal);
+    document.getElementById('dsInput').classList.add('wrong');
+    fb.innerHTML='<div class="feedback-chip wrong">\u2717 Was '+correct+'</div>';
+  }
+  document.querySelector('.submit-btn').disabled=true;
+  setTimeout(function(){nextDualStream();},800);
+}
+
+function endDualStream(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+// ══════════════════════════════
+// CHUNKING TRAINER
+// ══════════════════════════════
+var chQ=0, chTotal=8, chNumber='', chTotalDigits=0, chDigitsRecalled=0;
+
+function initChunking(){
+  chQ=0; chDigitsRecalled=0; chTotalDigits=0;
+  setScore(0); setProgress(0,chTotal);
+  nextChunking();
+}
+
+function nextChunking(){
+  if(chQ>=chTotal){ endChunking(); return; }
+  var len=8+chQ*2; // 8 to 22 digits
+  chNumber='';
+  for(var i=0;i<len;i++) chNumber+=randInt(0,9);
+  chTotalDigits+=len;
+  setProgress(chQ,chTotal);
+  // Show the number
+  var area=document.getElementById('gameArea');
+  var chunked='';
+  for(var i=0;i<chNumber.length;i+=4){
+    chunked+='<span style="margin:0 6px">'+chNumber.slice(i,i+4)+'</span>';
+  }
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(chQ+1)+' / '+chTotal+' \u2014 '+len+' digits</div>'+
+    '<div class="question-card"><div class="q-label">Memorize this number</div><div style="font-size:32px;font-weight:700;font-family:var(--serif);letter-spacing:.04em;margin:12px 0;display:flex;justify-content:center;flex-wrap:wrap">'+chunked+'</div><div style="font-size:12px;color:var(--text3)">Shown in groups of 4 to help you chunk</div></div>';
+  var showTime=Math.max(2500,4000-chQ*200);
+  setTimeout(function(){ askChunking(); },showTime);
+}
+
+function askChunking(){
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(chQ+1)+' / '+chTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">Type what you remember</div><div style="font-size:14px;color:var(--text3)">'+chNumber.length+' digits \u2014 get as many as you can from the start</div></div>'+
+    '<input class="answer-input" id="chInput" type="text" inputmode="numeric" placeholder="Type the number..." autocomplete="off" style="letter-spacing:.06em"/>'+
+    '<button class="submit-btn" style="max-width:200px" onclick="checkChunking()">Submit</button>'+
+    '<div id="chFb" style="min-height:40px;display:flex;flex-direction:column;align-items:center;gap:4px"></div>';
+  document.getElementById('chInput').focus();
+  document.getElementById('chInput').addEventListener('keydown',function(e){if(e.key==='Enter')checkChunking();});
+}
+
+function checkChunking(){
+  var val=(document.getElementById('chInput').value||'').replace(/\s/g,'');
+  session.attempts++;
+  // Count correct digits from start
+  var correct=0;
+  for(var i=0;i<Math.min(val.length,chNumber.length);i++){
+    if(val[i]===chNumber[i]) correct++; else break;
+  }
+  chDigitsRecalled+=correct;
+  var fb=document.getElementById('chFb');
+  var pct=Math.round(correct/chNumber.length*100);
+  if(correct===chNumber.length){
+    session.correct++;
+    setScore(session.correct);
+    fb.innerHTML='<div class="feedback-chip correct">\u2713 Perfect! All '+chNumber.length+' digits</div>';
+  } else {
+    fb.innerHTML='<div class="feedback-chip '+(correct>chNumber.length/2?'correct':'wrong')+'">'+ correct+'/'+chNumber.length+' digits correct ('+pct+'%)</div>'+
+      '<div style="font-size:12px;color:var(--text3);font-family:monospace;margin-top:4px">'+chNumber+'</div>';
+  }
+  chQ++; setProgress(chQ,chTotal);
+  document.querySelector('.submit-btn').disabled=true;
+  setTimeout(function(){nextChunking();},1200);
+}
+
+function endChunking(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  var pct=chTotalDigits>0?Math.round(chDigitsRecalled/chTotalDigits*100):0;
+  finishSession(pct,chTotal,elapsed,session.correct);
+}
+
+// ══════════════════════════════
+// CODE IN YOUR HEAD
+// ══════════════════════════════
+var CODE_HEAD_QS = [
+  {code:"x = 5\nx = x + 3\nprint(x)",ans:"8"},
+  {code:"a = [1,2,3]\na.reverse()\nprint(a[0])",ans:"3"},
+  {code:"x = 'hello'\nprint(x.upper()[1])",ans:"E"},
+  {code:"n = 0\nfor i in range(5):\n  n += i\nprint(n)",ans:"10"},
+  {code:"x = 10\nif x > 5:\n  x = x - 3\nelse:\n  x = x + 3\nprint(x)",ans:"7"},
+  {code:"s = ''\nfor c in 'abc':\n  s = c + s\nprint(s)",ans:"cba"},
+  {code:"d = {}\nfor c in 'aabbc':\n  d[c] = d.get(c,0)+1\nprint(d['b'])",ans:"2"},
+  {code:"x = [1,2,3,4,5]\nprint(sum(x[1:4]))",ans:"9"},
+  {code:"a = True\nb = False\nprint(a and not b)",ans:"True"},
+  {code:"x = 7\nprint(x % 3)",ans:"1"},
+  {code:"s = 'Python'\nprint(s[0]+s[-1])",ans:"Pn"},
+  {code:"x = [i**2 for i in range(4)]\nprint(x)",ans:"[0, 1, 4, 9]"},
+  {code:"a, b = 0, 1\nfor _ in range(4):\n  a, b = b, a+b\nprint(a)",ans:"3"},
+  {code:"x = 'racecar'\nprint(x == x[::-1])",ans:"True"},
+  {code:"x = [1,2,3]\ny = x[:]\ny.append(4)\nprint(len(x))",ans:"3"},
+  {code:"print(bool([]))",ans:"False"},
+  {code:"x = 100\nwhile x > 1:\n  x = x // 2\nprint(x)",ans:"1"},
+  {code:"s = 'hello world'\nprint(len(s.split()))",ans:"2"},
+];
+
+var chdQ=0, chdTotal=8, chdUsed=[];
+
+function initCodeHead(){
+  chdQ=0; chdUsed=[];
+  setScore(0); setProgress(0,chdTotal);
+  nextCodeHead();
+}
+
+function nextCodeHead(){
+  if(chdQ>=chdTotal){ endCodeHead(); return; }
+  var available=CODE_HEAD_QS.filter(function(_,i){return chdUsed.indexOf(i)<0;});
+  if(available.length<1){ chdUsed=[]; available=CODE_HEAD_QS.slice(); }
+  var idx=Math.floor(Math.random()*available.length);
+  var q=available[idx];
+  chdUsed.push(CODE_HEAD_QS.indexOf(q));
+  setProgress(chdQ,chdTotal);
+  // Show code for a limited time
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(chdQ+1)+' / '+chdTotal+'</div>'+
+    '<div style="font-size:13px;color:var(--text2);margin-bottom:4px">Read and trace this code</div>'+
+    '<div class="question-card" style="text-align:left"><pre class="code-block-game">'+escHtml(q.code)+'</pre></div>'+
+    '<div style="font-size:12px;color:var(--text3)">Disappears in a few seconds...</div>';
+  var showTime=Math.max(3000,5000-chdQ*250);
+  setTimeout(function(){ askCodeHead(q); },showTime);
+}
+
+function askCodeHead(q){
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(chdQ+1)+' / '+chdTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">What did it print?</div><div style="font-size:14px;color:var(--text3)">Type the exact output</div></div>'+
+    '<input class="answer-input" id="chdInput" type="text" placeholder="Output..." autocomplete="off" style="font-family:monospace;font-size:20px"/>'+
+    '<button class="submit-btn" style="max-width:200px" onclick="checkCodeHead(\''+escAttr(q.ans)+'\')">Submit</button>'+
+    '<div id="chdFb" style="height:28px;display:flex;align-items:center;justify-content:center"></div>';
+  document.getElementById('chdInput').focus();
+  document.getElementById('chdInput').addEventListener('keydown',function(e){if(e.key==='Enter')checkCodeHead(q.ans);});
+}
+
+function checkCodeHead(ans){
+  var val=(document.getElementById('chdInput').value||'').trim();
+  session.attempts++;
+  var fb=document.getElementById('chdFb');
+  if(val===ans){
+    session.correct++; chdQ++;
+    setScore(session.correct); setProgress(chdQ,chdTotal);
+    document.getElementById('chdInput').classList.add('correct');
+    fb.innerHTML='<div class="feedback-chip correct">\u2713 Correct!</div>';
+  } else {
+    chdQ++; setProgress(chdQ,chdTotal);
+    document.getElementById('chdInput').classList.add('wrong');
+    fb.innerHTML='<div class="feedback-chip wrong">\u2717 Was '+escHtml(ans)+'</div>';
+  }
+  document.querySelector('.submit-btn').disabled=true;
+  setTimeout(function(){nextCodeHead();},900);
+}
+
+function endCodeHead(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+}
+
+// ══════════════════════════════
+// CONFIDENCE CALIBRATION
+// ══════════════════════════════
+var CAL_QS = [
+  {q:"What is 17 x 13?",ans:"221",opts:["204","221","231","247"]},
+  {q:"What is 23 x 19?",ans:"437",opts:["437","423","441","457"]},
+  {q:"What is 144 / 12?",ans:"12",opts:["11","12","13","14"]},
+  {q:"What is 15% of 240?",ans:"36",opts:["32","36","40","42"]},
+  {q:"What is 2^8?",ans:"256",opts:["128","256","512","64"]},
+  {q:"What is the square root of 196?",ans:"14",opts:["12","13","14","16"]},
+  {q:"What is 7! (factorial)?",ans:"5040",opts:["720","2520","5040","40320"]},
+  {q:"What is 0.125 as a fraction?",ans:"1/8",opts:["1/4","1/6","1/8","1/10"]},
+  {q:"Binary 1010 in decimal?",ans:"10",opts:["8","10","12","14"]},
+  {q:"What is 33% of 900?",ans:"297",opts:["270","297","303","330"]},
+  {q:"HTTP status 403 means?",ans:"Forbidden",opts:["Not Found","Forbidden","Unauthorized","Bad Request"]},
+  {q:"What is log2(64)?",ans:"6",opts:["4","5","6","8"]},
+  {q:"What is 3^5?",ans:"243",opts:["125","243","729","81"]},
+  {q:"How many bytes in a kilobyte?",ans:"1024",opts:["1000","1024","512","2048"]},
+  {q:"What is 45 x 22?",ans:"990",opts:["880","990","1010","1100"]},
+  {q:"Hex FF in decimal?",ans:"255",opts:["127","255","256","511"]},
+];
+
+var calQ=0, calTotal=10, calUsed=[], calResults=[];
+
+function initCalibrate(){
+  calQ=0; calUsed=[]; calResults=[];
+  setScore(0); setProgress(0,calTotal);
+  nextCalibrate();
+}
+
+function nextCalibrate(){
+  if(calQ>=calTotal){ endCalibrate(); return; }
+  var available=CAL_QS.filter(function(_,i){return calUsed.indexOf(i)<0;});
+  if(available.length<1){ calUsed=[]; available=CAL_QS.slice(); }
+  var idx=Math.floor(Math.random()*available.length);
+  var q=available[idx];
+  calUsed.push(CAL_QS.indexOf(q));
+  var shuffled=q.opts.slice().sort(function(){return Math.random()-.5;});
+  setProgress(calQ,calTotal);
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div style="font-size:13px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">'+(calQ+1)+' / '+calTotal+'</div>'+
+    '<div class="question-card"><div class="q-label">Answer first</div><div style="font-size:20px;font-weight:700;color:var(--text);margin:8px 0">'+escHtml(q.q)+'</div></div>'+
+    '<div class="options-grid">'+shuffled.map(function(o){
+      return '<button class="option-btn" style="font-size:16px" onclick="calPickAnswer(this,\''+escAttr(o)+'\',\''+escAttr(q.ans)+'\')" data-val="'+escAttr(o)+'">'+escHtml(o)+'</button>';
+    }).join('')+'</div>'+
+    '<div id="calConfWrap" style="display:none;width:100%;text-align:center">'+
+      '<div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px">How confident are you?</div>'+
+      '<div style="display:flex;gap:6px;justify-content:center" id="calConfBtns">'+
+        '<button class="option-btn" style="font-size:13px;padding:10px 14px" onclick="calRate(50)">50%<br><span style="font-size:10px;color:var(--text3)">Guess</span></button>'+
+        '<button class="option-btn" style="font-size:13px;padding:10px 14px" onclick="calRate(70)">70%<br><span style="font-size:10px;color:var(--text3)">Think so</span></button>'+
+        '<button class="option-btn" style="font-size:13px;padding:10px 14px" onclick="calRate(90)">90%<br><span style="font-size:10px;color:var(--text3)">Sure</span></button>'+
+        '<button class="option-btn" style="font-size:13px;padding:10px 14px" onclick="calRate(100)">100%<br><span style="font-size:10px;color:var(--text3)">Certain</span></button>'+
+      '</div>'+
+    '</div>'+
+    '<div id="calFb" style="height:28px;display:flex;align-items:center;justify-content:center"></div>';
+}
+
+var calPicked='', calCorrectAns='', calWasCorrect=false;
+
+function calPickAnswer(btn, picked, answer){
+  document.querySelectorAll('.options-grid .option-btn').forEach(function(b){b.disabled=true;});
+  calPicked=picked; calCorrectAns=answer;
+  calWasCorrect=(picked===answer);
+  if(calWasCorrect) btn.classList.add('correct');
+  else{
+    btn.classList.add('wrong');
+    document.querySelectorAll('.options-grid .option-btn').forEach(function(b){if(b.dataset.val===answer)b.classList.add('correct');});
+  }
+  document.getElementById('calConfWrap').style.display='block';
+}
+
+function calRate(conf){
+  session.attempts++;
+  if(calWasCorrect) session.correct++;
+  calResults.push({correct:calWasCorrect, confidence:conf});
+  calQ++; setScore(session.correct); setProgress(calQ,calTotal);
+  var fb=document.getElementById('calFb');
+  fb.innerHTML='<div class="feedback-chip '+(calWasCorrect?'correct':'wrong')+'">'+(calWasCorrect?'\u2713 Correct':'\u2717 Wrong')+' \u2014 you said '+conf+'% confident</div>';
+  setTimeout(function(){nextCalibrate();},1000);
+}
+
+function endCalibrate(){
+  var elapsed=Math.round((Date.now()-session.startTime)/1000);
+  // Calculate calibration score
+  var buckets={50:{correct:0,total:0},70:{correct:0,total:0},90:{correct:0,total:0},100:{correct:0,total:0}};
+  calResults.forEach(function(r){ buckets[r.confidence].total++; if(r.correct) buckets[r.confidence].correct++; });
+  // Show calibration in results
+  finishSession(session.correct,session.attempts,elapsed,session.correct);
+  // Append calibration details
+  var card=document.querySelector('.results-card');
+  if(card){
+    var calHtml='<div style="margin-top:16px;text-align:left"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Calibration</div>';
+    [50,70,90,100].forEach(function(c){
+      var b=buckets[c];
+      if(!b.total) return;
+      var actual=Math.round(b.correct/b.total*100);
+      var diff=actual-c;
+      var color=Math.abs(diff)<=15?'var(--green)':Math.abs(diff)<=30?'var(--text2)':'var(--red)';
+      calHtml+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px"><span style="width:80px;font-weight:600">Said '+c+'%</span><span style="color:'+color+';font-weight:600">Actual: '+actual+'%</span><span style="color:var(--text3);font-size:11px">('+b.correct+'/'+b.total+')</span></div>';
+    });
+    calHtml+='<div style="font-size:11px;color:var(--text3);margin-top:6px">Perfect calibration = your confidence matches your accuracy</div></div>';
+    card.innerHTML+=calHtml;
+  }
+}
+
 // ── Finish ──
 function finishSession(correct,attempts,elapsed,score){
   clearInterval(mathTimer);
@@ -2133,7 +2483,7 @@ function finishSession(correct,attempts,elapsed,score){
   saveStats();
 
   const acc=attempts?Math.round(correct/attempts*100):0;
-  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!',operator:'Hunt complete!',truefalse:'Quick thinker!',gridmem:'Grid cleared!',flashnum:'Sharp eyes!',bigo:'Complexity mastered!',output:'Code reader!',ayahmatch:'MashaAllah!',fillgap:'Well memorized!',surahid:'Surah scholar!',letterflash:'Sharp reader!',worddecode:'Well decoded!',wordflash:'Word master!',positiontr:'Form master!'};
+  const titles={math:'Sprint complete!',memory:'Memory done!',patterns:'Pattern master!',chains:'Chain broken!',rapid:'Lightning fast!',fermi:'Estimation done!',operator:'Hunt complete!',truefalse:'Quick thinker!',gridmem:'Grid cleared!',flashnum:'Sharp eyes!',bigo:'Complexity mastered!',output:'Code reader!',ayahmatch:'MashaAllah!',fillgap:'Well memorized!',surahid:'Surah scholar!',letterflash:'Sharp reader!',worddecode:'Well decoded!',wordflash:'Word master!',positiontr:'Form master!',dualstream:'Dual tracked!',chunking:'Well chunked!',codehead:'Mental compiler!',calibrate:'Well calibrated!'};
   const emojis={math:'⚡',memory:'🧩',patterns:'🔢',chains:'🔗',rapid:'👁️',fermi:'🎯',operator:'🔍',truefalse:'✅',gridmem:'🟦',flashnum:'💡',bigo:'📊',output:'💻',ayahmatch:'📖',fillgap:'✨',surahid:'🕌'};
   document.getElementById('resultsEmoji').textContent=emojis[currentMode];
   document.getElementById('resultsTitle').textContent=titles[currentMode];
