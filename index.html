@@ -1253,19 +1253,63 @@ function endTF(){
 // ══════════════════════════════
 // GRID MEMORY
 // ══════════════════════════════
-let gmSize=4, gmLit=[], gmSelected=[], gmQ=0, gmTotal=8, gmExpectedCount=3;
+let gmSize=4, gmLit=[], gmSelected=[], gmQ=0, gmTotal=8, gmExpectedCount=3, gmStartCells=3, gmStartSize=4;
 
 function initGridMem(){
-  gmSize=4; gmQ=0; gmExpectedCount=3;
+  // Show settings screen
+  var area=document.getElementById('gameArea');
+  area.innerHTML=
+    '<div class="question-card" style="max-width:360px">'+
+      '<div class="q-label">Grid Memory Settings</div>'+
+      '<div style="margin:16px 0">'+
+        '<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">Rounds</div>'+
+        '<div style="display:flex;gap:6px" id="gmRoundsOpts"></div>'+
+      '</div>'+
+      '<div style="margin:12px 0">'+
+        '<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">Starting grid</div>'+
+        '<div style="display:flex;gap:6px" id="gmSizeOpts"></div>'+
+      '</div>'+
+      '<div style="margin:12px 0">'+
+        '<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">Starting cells lit</div>'+
+        '<div style="display:flex;gap:6px" id="gmCellOpts"></div>'+
+      '</div>'+
+    '</div>'+
+    '<button class="submit-btn" style="max-width:200px" onclick="launchGridMem()">Start</button>';
+  // Defaults
+  gmTotal=8; gmStartSize=4; gmStartCells=3;
+  renderGmOpts();
+}
+
+function renderGmOpts(){
+  var rounds=[8,12,16,20];
+  var sizes=[{l:'4×4',v:4},{l:'5×5',v:5},{l:'6×6',v:6}];
+  var cells=[3,4,5,6];
+  document.getElementById('gmRoundsOpts').innerHTML=rounds.map(function(r){
+    return '<button class="option-btn" style="flex:1;font-size:14px;padding:10px'+(gmTotal===r?';background:var(--text);color:var(--white);border-color:var(--text)':'')+'" onclick="gmTotal='+r+';renderGmOpts()">'+r+'</button>';
+  }).join('');
+  document.getElementById('gmSizeOpts').innerHTML=sizes.map(function(s){
+    return '<button class="option-btn" style="flex:1;font-size:14px;padding:10px'+(gmStartSize===s.v?';background:var(--text);color:var(--white);border-color:var(--text)':'')+'" onclick="gmStartSize='+s.v+';renderGmOpts()">'+s.l+'</button>';
+  }).join('');
+  document.getElementById('gmCellOpts').innerHTML=cells.map(function(c){
+    return '<button class="option-btn" style="flex:1;font-size:14px;padding:10px'+(gmStartCells===c?';background:var(--text);color:var(--white);border-color:var(--text)':'')+'" onclick="gmStartCells='+c+';renderGmOpts()">'+c+'</button>';
+  }).join('');
+}
+
+function launchGridMem(){
+  gmSize=gmStartSize; gmQ=0; gmExpectedCount=gmStartCells;
   setScore(0); setProgress(0,gmTotal);
   nextGridMem();
 }
 
 function nextGridMem(){
   if(gmQ>=gmTotal){ endGridMem(); return; }
-  // Increase difficulty
-  gmExpectedCount = Math.min(3 + Math.floor(gmQ/2), 8);
-  if(gmQ>=6) gmSize=5;
+  // Progressive difficulty
+  gmExpectedCount = Math.min(gmStartCells + Math.floor(gmQ/3), gmSize*gmSize-2);
+  // Grow grid at intervals
+  if(gmStartSize===4 && gmQ>=Math.floor(gmTotal*0.5)) gmSize=5;
+  if(gmStartSize===4 && gmQ>=Math.floor(gmTotal*0.8)) gmSize=6;
+  if(gmStartSize===5 && gmQ>=Math.floor(gmTotal*0.6)) gmSize=6;
+  gmExpectedCount = Math.min(gmExpectedCount, gmSize*gmSize-2);
   // Pick random cells to light up
   var totalCells = gmSize*gmSize;
   gmLit=[]; gmSelected=[];
